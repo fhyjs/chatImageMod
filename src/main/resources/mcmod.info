@@ -2,13 +2,13 @@
 {
   "modid": "chatimage",
   "name": "chatimage Mod",
-  "description": "Example placeholder mod.",
+  "description": "Send images in chat bar.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://hanana.eu.org",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["fhyjs"],
+  "credits": "The HANANA Group, for making this mod",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

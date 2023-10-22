@@ -39,15 +39,20 @@ public class ChatImageMod
         INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(ChatImageMod.MODID);
         INSTANCE.registerMessage(JntmMessageHandler.class, JntmMessage.class, 0, Side.CLIENT);
         INSTANCE.registerMessage(JntmMessageHandler.class, JntmMessage.class, 0, Side.SERVER);
+        INSTANCE.registerMessage(UploadMessageHandler.class, UploadMessage.class, 1, Side.CLIENT);
+        INSTANCE.registerMessage(UploadMessageHandler.class, UploadMessage.class, 1, Side.SERVER);
+        INSTANCE.registerMessage(UploadMMessageHandler.class, UploadMMessage.class, 2, Side.CLIENT);
+        INSTANCE.registerMessage(UploadMMessageHandler.class, UploadMMessage.class, 2, Side.SERVER);
     }
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
-        ((Map<String, HoverEvent.Action>) ObfuscationReflectionHelper.getPrivateValue(HoverEvent.Action.class, null, "field_150690_d")).put(Actions.SHOW_IMAGE.getCanonicalName(), Actions.SHOW_IMAGE);
+        Object hoverEvents= ObfuscationReflectionHelper.getPrivateValue(HoverEvent.Action.class, null, "field_150690_d");
+        if (hoverEvents instanceof Map) {
+            ((Map<String, HoverEvent.Action>) hoverEvents).put(Actions.SHOW_IMAGE.getCanonicalName(), Actions.SHOW_IMAGE);
+        }
         // 注册自定义协议处理程序
         URL.setURLStreamHandlerFactory(new ChatImage.ChatImageHandlerFactory());
-        // some example code
-        logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
         registerMessage();
     }
 }

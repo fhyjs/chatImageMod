@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.toasts.SystemToast;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -52,6 +53,8 @@ public class ScreenCIChat extends GuiContainer {
         textFieldPV = new GuiTextField(4, this.fontRenderer, guiLeft+12, guiTop+20, 100, 15);
         textFieldPV.setMaxStringLength(Integer.MAX_VALUE);
         textFieldCIURL.setMaxStringLength(Integer.MAX_VALUE);
+        buttonList.add(new GuiButton(3,guiLeft+xSize-90,guiTop+ySize-30,50,20, lang_cn?"本地图片":"Local Img"));
+
     }
 
     @Override
@@ -78,12 +81,16 @@ public class ScreenCIChat extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
+        GlStateManager.pushMatrix();
+        GlStateManager.color(0,0,0,1);
+
         textFieldCIURL.drawTextBox();
         textFieldCIH.drawTextBox();
         textFieldCIW.drawTextBox();
         textFieldCIINFO.drawTextBox();
         textFieldPV.drawTextBox();
 
+        GlStateManager.popMatrix();
     }
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
@@ -127,9 +134,17 @@ public class ScreenCIChat extends GuiContainer {
                     chatImageData.h=Integer.parseInt(textFieldCIH.getText());
                     chatImageData.information=textFieldCIINFO.getText();
                     textFieldPV.setText(textFieldPV.getText()+chatImageData);
+
+                    textFieldCIH.setText("");
+                    textFieldCIINFO.setText("");
+                    textFieldCIURL.setText("");
+                    textFieldCIW.setText("");
                 }catch (Throwable e){
                     mc.getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,new TextComponentString("ERROR:"+(lang_cn?"请检查文本输入":"Please Check Your Inputs")).setStyle(new Style().setColor(TextFormatting.RED)),new TextComponentString(e.toString())));
                 }
+                break;
+            case 3:
+                mc.displayGuiScreen(new ScreenCILocalImg(this));
                 break;
         }
     }
