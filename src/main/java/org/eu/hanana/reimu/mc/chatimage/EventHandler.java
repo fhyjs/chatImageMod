@@ -89,6 +89,7 @@ public class EventHandler {
             GlStateManager.disableLighting();
         }
     }
+    @SideOnly(Side.CLIENT)
     public static void  drawHoveringImage(GuiScreen guiScreen, @NotNull ChatImage chatImage, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font)
     {
         if (chatImage!=null)

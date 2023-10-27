@@ -17,9 +17,11 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -232,6 +234,15 @@ public class ChatImage {
                 url=url.substring(3);
                 if (url.startsWith("mod")) {
                     return ClassLoader.getSystemResourceAsStream(url.substring(3));
+                }
+                if (url.startsWith("lo")) {
+                    url=url.substring(3);
+                    ChatImageMod.logger.info(url);
+                    try {
+                        return new ByteArrayInputStream(Objects.requireNonNull(Utils.GetSvDATA(Integer.parseInt(url))));
+                    } catch (Exception e) {
+                        return null;
+                    }
                 }
                 return null;
             }

@@ -102,9 +102,16 @@ public class ScreenCILocalImg extends GuiContainer {
                         break;
                     }
 
-                    byte[] bytes = Utils.ReadFile(file);
+
                     try {
-                        Utils.SendLByte(bytes);
+                        byte[] bytes = Utils.ReadFile(file);
+                        String surl = Utils.SendLByte(bytes);
+                        if (par instanceof ScreenCIChat){
+                            if (surl != null) {
+                                ((ScreenCIChat) par).textFieldCIURL.setText(surl);
+                                mc.currentScreen=par;
+                            }
+                        }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

@@ -25,6 +25,8 @@ public class UploadMMessageHandler implements IMessageHandler<UploadMMessage, IM
                 UploadManager.UpLoadsSize.put(ctx.getServerHandler().player.getEntityId(),message.a);
             }
             if (message.o.startsWith("finish")){
+                boolean ok=false;
+                int ok1 = 0;
                 Map<Integer, byte[]> uploaddata = UploadManager.UpLoads.get(ctx.getServerHandler().player.getEntityId());
                 int maxd=0;
                 for (Integer i : uploaddata.keySet()) {
@@ -46,17 +48,23 @@ public class UploadMMessageHandler implements IMessageHandler<UploadMMessage, IM
                     while (new File("chatimages/"+fn).exists())
                         fn++;
                     Utils.WriteFile("chatimages/"+fn,fbyte);
+                    ok=true;
+                    ok1=fn;
                 }else {
                     ChatImageMod.logger.error("Error Data");
                 }
                 UploadManager.UpLoads.remove(ctx.getServerHandler().player.getEntityId());
                 UploadManager.UpLoadsSize.remove(ctx.getServerHandler().player.getEntityId());
+                if (ok)
+                    return new UploadMMessage(100000001,String.valueOf(ok1));
+                return new UploadMMessage(100000000,"ok");
             }
             return new UploadMMessage(0,"ok");
         }else {
-            if (message.o.startsWith("ok")){
-                Utils.OK=true;
+            if (message.a==100000001){
+                Utils.SvReply = Integer.valueOf(message.o);
             }
+            Utils.OK=true;
             return null;
         }
     }

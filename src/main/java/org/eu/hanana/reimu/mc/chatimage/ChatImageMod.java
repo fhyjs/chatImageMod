@@ -14,7 +14,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 import org.eu.hanana.reimu.mc.chatimage.enums.Actions;
 
+import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 @Mod(modid = ChatImageMod.MODID, name = ChatImageMod.NAME, version = ChatImageMod.VERSION)
@@ -43,6 +45,10 @@ public class ChatImageMod
         INSTANCE.registerMessage(UploadMessageHandler.class, UploadMessage.class, 1, Side.SERVER);
         INSTANCE.registerMessage(UploadMMessageHandler.class, UploadMMessage.class, 2, Side.CLIENT);
         INSTANCE.registerMessage(UploadMMessageHandler.class, UploadMMessage.class, 2, Side.SERVER);
+        INSTANCE.registerMessage(Caclmd5MessageHandler.class, Caclmd5Message.class, 3, Side.CLIENT);
+        INSTANCE.registerMessage(Caclmd5MessageHandler.class, Caclmd5Message.class, 3, Side.SERVER);
+        INSTANCE.registerMessage(DownloadMessageHandler.class, DownloadMessage.class, 4, Side.CLIENT);
+        INSTANCE.registerMessage(DownloadMessageHandler.class, DownloadMessage.class, 4, Side.SERVER);
     }
     @EventHandler
     public void init(FMLInitializationEvent event)
@@ -54,5 +60,9 @@ public class ChatImageMod
         // 注册自定义协议处理程序
         URL.setURLStreamHandlerFactory(new ChatImage.ChatImageHandlerFactory());
         registerMessage();
+        List<File> files = Utils.traverseFolder(new File("chatimages/"));
+        for (File file : files) {
+            file.delete();
+        }
     }
 }

@@ -18,7 +18,7 @@ import java.io.IOException;
 public class ScreenCIChat extends GuiContainer {
     private static final ResourceLocation BACKGROUND = new ResourceLocation( "textures/gui/demo_background.png");
     ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-    private GuiTextField textFieldCIURL;
+    public GuiTextField textFieldCIURL;
     private GuiTextField textFieldCIINFO;
     private GuiTextField textFieldCIW;
     private GuiTextField textFieldCIH;
