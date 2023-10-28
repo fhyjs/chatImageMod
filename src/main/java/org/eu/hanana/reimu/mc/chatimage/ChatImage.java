@@ -18,10 +18,10 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,8 +68,15 @@ public class ChatImage {
         for (ChatImage value : bufferedCI.values()) {
             value.status= ImageStatus.ERROR;
         }
-        for (ResourceLocation value : bufferedImagesRl.values()) {
-            Minecraft.getMinecraft().getTextureManager().deleteTexture(value);
+        if (FMLCommonHandler.instance().getSide().isClient())
+            for (ResourceLocation value : bufferedImagesRl.values()) {
+                Minecraft.getMinecraft().getTextureManager().deleteTexture(value);
+            }
+        else {
+            List<File> files = Utils.traverseFolder(new File("chatimages/"));
+            for (File file : files) {
+                file.delete();
+            }
         }
         bufferedCI.clear();
         bufferedImagesRl.clear();

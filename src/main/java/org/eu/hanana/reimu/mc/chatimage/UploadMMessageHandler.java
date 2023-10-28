@@ -1,19 +1,14 @@
 package org.eu.hanana.reimu.mc.chatimage;
 
-import io.netty.buffer.*;
-import net.minecraft.util.IThreadListener;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
-import javax.rmi.CORBA.Util;
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class UploadMMessageHandler implements IMessageHandler<UploadMMessage, IMessage> {
 

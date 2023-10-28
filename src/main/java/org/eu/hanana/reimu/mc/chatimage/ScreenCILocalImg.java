@@ -3,7 +3,6 @@ package org.eu.hanana.reimu.mc.chatimage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.toasts.SystemToast;
@@ -42,13 +41,15 @@ public class ScreenCILocalImg extends GuiContainer {
         lang_cn=mc.getLanguageManager().getCurrentLanguage().getLanguageCode().equalsIgnoreCase("zh_cn");
         buttonList.add(new GuiButton(0, guiLeft+xSize-35, guiTop+5,20, 20, "X"));
         buttonList.add(new GuiButton(1, guiLeft+15, guiTop+20,40, 20, lang_cn?"选择文件":"Choose a file"));
+        buttonList.add(new GuiButton(2, guiLeft+15, guiTop+55,40, 20, lang_cn?"清除":"Clear"));
 
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-        fontRenderer.drawString(lang_cn?"宽":"Width",35,105,0);
+        fontRenderer.drawString(lang_cn?"使用本地图片":"use local img",10,10,0);
+        fontRenderer.drawString(lang_cn?"清除缓存":"Clear cache",10,42,0);
         // 使用字体渲染方法在GUI上绘制文本
         //this.fontRenderer.drawString(iTextComponent., 50, 50, 0xFFFFFF);
     }
@@ -77,6 +78,10 @@ public class ScreenCILocalImg extends GuiContainer {
     public void handleKeyboardInput() throws IOException
     {
         char c0 = Keyboard.getEventCharacter();
+        if (c0=='\u001B'){
+            mc.currentScreen=par;
+            return;
+        }
         if (c0=='e') {
             this.keyTyped(c0,c0);
             return;
@@ -117,6 +122,10 @@ public class ScreenCILocalImg extends GuiContainer {
                     }
 
                 }
+                break;
+            case 2:
+                ChatImage.clearCache();
+                mc.getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,new TextComponentString("SUCCESS:").setStyle(new Style().setColor(TextFormatting.GREEN)),new TextComponentString(lang_cn?"已清除缓存":"Cleared")));
                 break;
         }
     }

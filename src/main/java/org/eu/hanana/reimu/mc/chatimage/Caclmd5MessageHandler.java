@@ -1,15 +1,11 @@
 package org.eu.hanana.reimu.mc.chatimage;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Caclmd5MessageHandler implements IMessageHandler<Caclmd5Message, IMessage> {
 

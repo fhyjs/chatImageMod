@@ -53,7 +53,7 @@ public class ScreenCIChat extends GuiContainer {
         textFieldPV = new GuiTextField(4, this.fontRenderer, guiLeft+12, guiTop+20, 100, 15);
         textFieldPV.setMaxStringLength(Integer.MAX_VALUE);
         textFieldCIURL.setMaxStringLength(Integer.MAX_VALUE);
-        buttonList.add(new GuiButton(3,guiLeft+xSize-90,guiTop+ySize-30,50,20, lang_cn?"本地图片":"Local Img"));
+        buttonList.add(new GuiButton(3,guiLeft+xSize-90,guiTop+ySize-30,50,20, lang_cn?"图片管理":"Img Manager"));
 
     }
 

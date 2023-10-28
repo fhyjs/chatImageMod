@@ -5,7 +5,6 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
@@ -24,7 +23,6 @@ import org.eu.hanana.reimu.mc.chatimage.enums.Actions;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Mouse;
 
-import java.awt.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;

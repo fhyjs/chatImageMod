@@ -5,8 +5,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.Display;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -91,7 +89,11 @@ public class Utils {
                 Thread.sleep(1);
             }
         }
+        OK=false;
         ChatImageMod.INSTANCE.sendToServer(new UploadMMessage(0,"finish"));
+        while (!OK){
+            Thread.sleep(1);
+        }
         SEND_FINISH=true;
         if (SvReply instanceof Integer)
             return "ci:lo/"+SvReply;
