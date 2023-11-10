@@ -119,12 +119,12 @@ public class ScreenCIChat extends GuiContainer {
         super.actionPerformed(button);
         switch (button.id){
             case 0:
-                ChatImageMod.INSTANCE.sendToServer(new JntmMessage(0));
+                ChatImageMod.NETWORK.sendToServer(new JntmMessage(0));
                 break;
             case 1:
                 mc.player.sendChatMessage(textFieldPV.getText());
                 textFieldPV.setText("");
-                ChatImageMod.INSTANCE.sendToServer(new JntmMessage(0));
+                ChatImageMod.NETWORK.sendToServer(new JntmMessage(0));
                 break;
             case 2:
                 ChatImage.ChatImageData chatImageData = new ChatImage.ChatImageData();

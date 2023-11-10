@@ -20,6 +20,7 @@ archivesBaseName = 'chatimage'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
+    accessTransformer = file('src/main/resources/META-INF/cim_at.cfg')
     // The mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   Snapshot are built nightly.
     // stable_#            Stables are built at the discretion of the MCP team.
@@ -75,7 +76,9 @@ minecraft {
 }
 
 dependencies {
+    implementation fileTree("lib")
     implementation 'org.jetbrains:annotations:24.0.0'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.44.v20210927'
 
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
@@ -116,6 +119,7 @@ jar {
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"hanana",
+            'FMLAT': 'cim_at.cfg',
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
             "Main-Class": "org.eu.hanana.reimu.mc.chatimage.WinRun"
         ])
