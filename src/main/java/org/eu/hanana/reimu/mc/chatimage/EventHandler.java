@@ -20,9 +20,12 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.eu.hanana.reimu.mc.chatimage.Event.RenderTooltipImageEvent;
 import org.eu.hanana.reimu.mc.chatimage.enums.Actions;
+import org.eu.hanana.reimu.mc.chatimage.http.WsHandler;
+import org.eu.hanana.reimu.mc.chatimage.http.apis.ws.WsApiBase;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Mouse;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -284,12 +287,15 @@ public class EventHandler {
     }
     // 创建一个方法来处理聊天事件
     @SubscribeEvent
-    public void onServerChat(ServerChatEvent event) {
+    public void onServerChat(ServerChatEvent event) throws IOException {
         // 获取发送聊天消息的玩家
         EntityPlayer player = event.getPlayer();
         // 获取聊天消息内容
         String message = event.getMessage();
         if (message.startsWith("/")) return;
+
+        for (WsHandler handler : WsHandler.HANDLERS)
+            WsApiBase.sendStrMsg(handler.getSession(),message.startsWith("#")?message.substring(1):message);
 
         // 定义正则表达式模式，匹配CI{...}形式的内容
         String pattern = "(CI\\{.*?\\})";

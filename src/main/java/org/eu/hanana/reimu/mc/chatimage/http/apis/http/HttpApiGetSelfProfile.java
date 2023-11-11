@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class HttpApiGetSelfProfile extends HttpServlet {
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 设置响应内容类型
         response.setContentType("application/json");
@@ -17,7 +18,7 @@ public class HttpApiGetSelfProfile extends HttpServlet {
 
         // 生成动态内容
         out.println("{\n" +
-                "    \"avatarUrl\": \"/icon\",\n" +
+                "    \"avatarUrl\": \"https://fhyjs.eu.org/cimicon.jpg?\",\n" +
                 "    \"birthday_day\": 0,\n" +
                 "    \"birthday_month\": 0,\n" +
                 "    \"birthday_year\": 0,\n" +

@@ -13,11 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WsHandler extends WebSocketAdapter {
+    public static final List<WsHandler> HANDLERS = new ArrayList<>();
     private final List<Object> wsApis = new ArrayList<>();
     @Override
     public void onWebSocketText(String message) {
-        // 处理接收到的文本消息
-        System.out.println("Received message: " + message);
 
         // 发送回复消息
         try {
@@ -44,6 +43,7 @@ public class WsHandler extends WebSocketAdapter {
         // 客户端连接时的处理逻辑
         super.onWebSocketConnect(session);
         System.out.println("Client connected: " + session.getRemoteAddress().getAddress());
+        HANDLERS.add(this);
 
         List<Class<?>> classes = Utils.getClasses("org.eu.hanana.reimu.mc.chatimage.http.apis");
         for (Class<?> aClass : classes) {
@@ -65,6 +65,7 @@ public class WsHandler extends WebSocketAdapter {
         // 连接关闭时的处理逻辑
         super.onWebSocketClose(statusCode, reason);
         System.out.println("Connection closed: " + statusCode + ", " + reason);
+        HANDLERS.remove(this);
     }
 
     @Override
@@ -72,6 +73,7 @@ public class WsHandler extends WebSocketAdapter {
         // 发生错误时的处理逻辑
         super.onWebSocketError(cause);
         cause.printStackTrace();
+        HANDLERS.remove(this);
     }
 }
 

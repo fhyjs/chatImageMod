@@ -1,24 +1,14 @@
 package org.eu.hanana.reimu.mc.chatimage.http;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.api.WebSocketBehavior;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jetty.websocket.client.NoOpEndpoint;
-import org.eclipse.jetty.websocket.common.events.JettyListenerEventDriver;
-import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
 import org.eu.hanana.reimu.mc.chatimage.http.apis.http.HttpApiGetSelfProfile;
+import org.eu.hanana.reimu.mc.chatimage.http.apis.http.HttpApiSend;
 
 public class HttpServer extends Thread{
     private final int port;
@@ -29,6 +19,7 @@ public class HttpServer extends Thread{
         this.port=port;
         setName(this.toString());
     }
+    public WebSocketServerFactory webSocketServerFactory;
 
     public void server(int p) throws Exception {
         // 创建 Jetty 服务器
@@ -40,7 +31,6 @@ public class HttpServer extends Thread{
         context.setDisplayName("ChatImgMod");
 
         // 创建WebSocketUpgradeFilter
-        WebSocketServerFactory webSocketServerFactory;
         WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configure(context);
         // 注册WebSocket Endpoint
         webSocketUpgradeFilter.addMapping("/", (webSocketServerFactory=new WebSocketServerFactory()));
@@ -53,6 +43,7 @@ public class HttpServer extends Thread{
         // 注册DynamicPageServlet到指定路径
         context.addServlet(new ServletHolder(new Api()), "/api");
         context.addServlet(new ServletHolder(new HttpApiGetSelfProfile()), "/api/getSelfProfile");
+        context.addServlet(new ServletHolder(new HttpApiSend()), "/api/message/send");
 
 
         // 启动服务器
