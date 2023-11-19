@@ -9,6 +9,7 @@ import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
 import org.eu.hanana.reimu.mc.chatimage.http.apis.http.HttpApiGetSelfProfile;
 import org.eu.hanana.reimu.mc.chatimage.http.apis.http.HttpApiSend;
+import org.eu.hanana.reimu.mc.chatimage.http.apis.http.HttpApiUpload;
 
 public class HttpServer extends Thread{
     private final int port;
@@ -44,6 +45,7 @@ public class HttpServer extends Thread{
         context.addServlet(new ServletHolder(new Api()), "/api");
         context.addServlet(new ServletHolder(new HttpApiGetSelfProfile()), "/api/getSelfProfile");
         context.addServlet(new ServletHolder(new HttpApiSend()), "/api/message/send");
+        context.addServlet(new ServletHolder(new HttpApiUpload()), "/api/upload");
 
 
         // 启动服务器

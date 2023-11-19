@@ -4,7 +4,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.Display;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -136,6 +138,18 @@ public class Utils {
             return (byte[]) SvReply;
         return null;
     }
+    public static byte[] imageToByteArray(BufferedImage image) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        // 写入字节数组输出流
+        ImageIO.write(image, "png", baos);
+
+        // 关闭输出流
+        baos.close();
+
+        // 获取字节数组
+        return baos.toByteArray();
+    }
     // 文件类取MD5
     public static String calcMD5(File file){
         try (InputStream stream = Files.newInputStream(file.toPath(), StandardOpenOption.READ)) {
@@ -218,7 +232,7 @@ public class Utils {
         return classes;
     }
 
-    private static List<Class<?>> findClasses(File directory, String packageName) {
+    private static List<Class<?>>findClasses(File directory, String packageName) {
         List<Class<?>> classes = new ArrayList<>();
 
         if (!directory.exists()) {
