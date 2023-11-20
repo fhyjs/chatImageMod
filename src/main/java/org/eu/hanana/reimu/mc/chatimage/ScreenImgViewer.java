@@ -137,8 +137,7 @@ public class ScreenImgViewer extends GuiContainer {
                 drawModalRectWithCustomSizedTexture(px, py, 0, 0, chatImage.originalBI.getWidth(), chatImage.originalBI.getHeight(), chatImage.originalBI.getWidth(), chatImage.originalBI.getHeight());
                 GlStateManager.popMatrix();
                 //禁用Scissor测试
-                if (!isShiftKeyDown())
-                    GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                GL11.glDisable(GL11.GL_SCISSOR_TEST);
             }
         }
     }
@@ -182,7 +181,10 @@ public class ScreenImgViewer extends GuiContainer {
                 mc.currentScreen = par;
                 break;
             case 1:
-                size-=0.2f;
+                if (!isShiftKeyDown())
+                    size-=0.2f;
+                else
+                    size-=0.01f;
                 break;
             case 2:
                 size=1;
@@ -190,7 +192,10 @@ public class ScreenImgViewer extends GuiContainer {
                 py=0;
                 break;
             case 3:
-                size+=.2f;
+                if (!isShiftKeyDown())
+                    size+=.2f;
+                else
+                    size+=0.01f;
                 break;
             case 4:
 
