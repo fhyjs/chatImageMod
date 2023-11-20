@@ -134,7 +134,7 @@ public class ScreenImgViewer extends GuiContainer {
 
                 mc.getTextureManager().bindTexture(resourceLocation); // 绑定材质
                 // 绘制材质
-                drawModalRectWithCustomSizedTexture(px, py, 0, 0, chatImage.width, chatImage.height, chatImage.width, chatImage.height);
+                drawModalRectWithCustomSizedTexture(px, py, 0, 0, chatImage.originalBI.getWidth(), chatImage.originalBI.getHeight(), chatImage.originalBI.getWidth(), chatImage.originalBI.getHeight());
                 GlStateManager.popMatrix();
                 //禁用Scissor测试
                 if (!isShiftKeyDown())

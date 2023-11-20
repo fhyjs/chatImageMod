@@ -35,7 +35,7 @@ public class ChatImage {
     public ImageStatus status;
     private ResourceLocation image;
     private ResourceLocation originalImg;
-    private BufferedImage originalBI;
+    public BufferedImage originalBI;
     public URL source;
     public ChatImage(){
         status= ImageStatus.NEW;
