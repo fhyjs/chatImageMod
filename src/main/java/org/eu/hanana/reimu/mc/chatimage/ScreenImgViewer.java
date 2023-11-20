@@ -86,12 +86,14 @@ public class ScreenImgViewer extends GuiContainer {
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        clickedMouseButton++;
         if (!(ox==-114514&&oy==-114514)) {
-            px += mouseX - ox;
-            py += mouseY - oy;
+            px += (mouseX - ox)*clickedMouseButton*(isShiftKeyDown()?5:1);
+            py += (mouseY - oy)*clickedMouseButton*(isShiftKeyDown()?5:1);
             oy=mouseY;
             ox=mouseX;
         }
+        clickedMouseButton--;
     }
 
     private void drawImg(){
