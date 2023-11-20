@@ -2,6 +2,7 @@ package org.eu.hanana.reimu.mc.chatimage;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -75,20 +76,7 @@ public class Utils {
     }
     private static boolean SEND_FINISH=true;
     public static MinecraftServer getIntegratedServer(){
-        Object minecraft;
-        try {
-            Class<?> mcc;
-            mcc = Class.forName("net.minecraft.client.Minecraft");
-            Method mci= ObfuscationReflectionHelper.findMethod(mcc,"func_71410_x",mcc,void.class);
-            minecraft = mci.invoke(null);
-            Object r = ObfuscationReflectionHelper.findMethod(mcc,"func_71401_C",Class.forName("net.minecraft.server.integrated.IntegratedServer"),void.class).invoke(minecraft);
-            if (r instanceof MinecraftServer)
-                return (MinecraftServer) r;
-        } catch (Exception e) {
-            return null;
-        }
-
-        return null;
+        return FMLClientHandler.instance().getServer();
     }
     /*
     public static EntityPlayer getClPlayer(){
