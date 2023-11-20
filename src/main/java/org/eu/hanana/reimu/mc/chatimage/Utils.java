@@ -92,6 +92,16 @@ public class Utils {
         }
         return null;
     }
+    public static boolean isClassExists(String className) {
+        try {
+            // 使用Class.forName尝试加载类
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            // 如果ClassNotFoundException被抛出，说明类不存在
+            return false;
+        }
+    }
     public static void downloadFile(URL url, File file) throws IOException {
 
         try (InputStream inputStream = url.openStream();

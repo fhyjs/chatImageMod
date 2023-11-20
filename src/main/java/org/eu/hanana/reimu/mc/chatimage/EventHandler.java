@@ -39,6 +39,7 @@ import static net.minecraftforge.fml.client.config.GuiUtils.drawGradientRect;
 
 @Mod.EventBusSubscriber
 public class EventHandler {
+    public static final List<WsHandler> HANDLERS = new ArrayList<>();
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onGuiOpen(GuiOpenEvent event)
@@ -329,6 +330,7 @@ public class EventHandler {
             GlStateManager.enableRescaleNormal();
         }
     }
+
     // 创建一个方法来处理聊天事件
     @SubscribeEvent
     public void onServerChat(ServerChatEvent event) throws IOException {
@@ -338,7 +340,7 @@ public class EventHandler {
         String message = event.getMessage();
         if (message.startsWith("/")) return;
 
-        for (WsHandler handler : WsHandler.HANDLERS)
+        for (WsHandler handler : HANDLERS)
             WsApiBase.sendStrMsg(handler.getSession(),message.startsWith("#")?message.substring(1):message);
 
         // 定义正则表达式模式，匹配CI{...}形式的内容

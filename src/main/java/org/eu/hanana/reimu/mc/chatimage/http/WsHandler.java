@@ -12,8 +12,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eu.hanana.reimu.mc.chatimage.EventHandler.HANDLERS;
+
 public class WsHandler extends WebSocketAdapter {
-    public static final List<WsHandler> HANDLERS = new ArrayList<>();
     private final List<Object> wsApis = new ArrayList<>();
     @Override
     public void onWebSocketText(String message) {

@@ -26,7 +26,7 @@ public class ChatImageMod
     public static SimpleNetworkWrapper NETWORK = null;
     public static final String MODID = "chatimage";
     public static final String NAME = "chatimage Mod";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     public static ChatImageMod INSTANCE;
     public static Logger logger;
     public HttpServer httpServer;
@@ -39,8 +39,12 @@ public class ChatImageMod
     public void preInit(FMLPreInitializationEvent event)
     {
         logger = event.getModLog();
-        httpServer = HttpServer.newHttpServer(25566);
-        httpServer.start();
+        if (Utils.isClassExists("org.eclipse.jetty.server.Server")) {
+            httpServer = HttpServer.newHttpServer(25566);
+            httpServer.start();
+        }else {
+            logger.warn("No Jetty Plugin!");
+        }
     }
     private void registerMessage(){
         NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(ChatImageMod.MODID);

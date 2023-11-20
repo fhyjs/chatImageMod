@@ -7,13 +7,13 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
     }
 }
-        
+
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.1'
+version = '1.2'
 group = 'org.eu.hanana.reimu.mc.chatimage' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'chatimage'
 
@@ -121,6 +121,7 @@ jar {
             "Implementation-Vendor" :"hanana",
             'FMLAT': 'cim_at.cfg',
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            //"ContainedDeps": "jelly.jar",
             "Main-Class": "org.eu.hanana.reimu.mc.chatimage.WinRun"
         ])
     }
