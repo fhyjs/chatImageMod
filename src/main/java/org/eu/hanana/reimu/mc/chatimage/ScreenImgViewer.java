@@ -50,6 +50,7 @@ public class ScreenImgViewer extends GuiContainer {
         buttonList.add(new GuiButton(1, guiLeft+xSize-35, guiTop+27,20, 20, "-"));
         buttonList.add(new GuiButton(2, guiLeft+xSize-60, guiTop+27,20, 20, "0"));
         buttonList.add(new GuiButton(3, guiLeft+xSize-85, guiTop+27,20, 20, "+"));
+        buttonList.add(new GuiButton(4, guiLeft+15, guiTop+27,40, 20, lang_cn?"下载":"Download"));
 
         sr = new ScaledResolution(Minecraft.getMinecraft());
     }
@@ -200,7 +201,10 @@ public class ScreenImgViewer extends GuiContainer {
                     size+=0.01f;
                 break;
             case 4:
-
+                File file;
+                if ((file=Utils.showSaveDialog())!=null){
+                    Utils.downloadFile(chatImage.source,file);
+                }
                 break;
             case 5:
 

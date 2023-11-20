@@ -16,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
@@ -72,6 +74,32 @@ public class Utils {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public static File showSaveDialog() {
+        JFileChooser fileChooser = new JFileChooser();
+
+        // 设置文件选择器的初始目录（可选）
+        // fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+        int userSelection = fileChooser.showSaveDialog(Display.getParent());
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            return fileToSave;
+        } else if (userSelection == JFileChooser.CANCEL_OPTION) {
+            System.out.println("Save command canceled by user.");
+        }
+        return null;
+    }
+    public static void downloadFile(URL url, File file) throws IOException {
+
+        try (InputStream inputStream = url.openStream();
+             ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
+             FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+
+            // 使用 NIO 将输入流复制到文件输出流
+            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         }
     }
     private static boolean SEND_FINISH=true;
