@@ -1,5 +1,6 @@
 package org.eu.hanana.reimu.mc.chatimage;
 
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -60,6 +61,10 @@ public class ChatImageMod
         Object hoverEvents= ObfuscationReflectionHelper.getPrivateValue(HoverEvent.Action.class, null, "field_150690_d");
         if (hoverEvents instanceof Map) {
             ((Map<String, HoverEvent.Action>) hoverEvents).put(Actions.SHOW_IMAGE.getCanonicalName(), Actions.SHOW_IMAGE);
+        }
+        Object clickEvents= ObfuscationReflectionHelper.getPrivateValue(ClickEvent.Action.class, null, "field_150679_e");
+        if (hoverEvents instanceof Map) {
+            ((Map<String, ClickEvent.Action>) clickEvents).put(Actions.VIEW_IMAGE.getCanonicalName(), Actions.VIEW_IMAGE);
         }
         // 注册自定义协议处理程序
         URL.setURLStreamHandlerFactory(new ChatImage.ChatImageHandlerFactory());

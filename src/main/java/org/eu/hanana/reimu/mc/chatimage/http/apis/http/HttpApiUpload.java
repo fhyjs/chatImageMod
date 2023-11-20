@@ -1,15 +1,11 @@
 package org.eu.hanana.reimu.mc.chatimage.http.apis.http;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import org.eclipse.jetty.http.MultiPartFormInputStream;
 import org.eclipse.jetty.util.MultiPartInputStreamParser;
 import org.eu.hanana.reimu.mc.chatimage.ChatImage;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
@@ -21,14 +17,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Spliterator;
 
 public class HttpApiUpload extends HttpServlet {
     @Override
@@ -60,7 +52,7 @@ public class HttpApiUpload extends HttpServlet {
         cid.h=100;
         cid.w=100;
         if (FMLCommonHandler.instance().getSide().isClient()){
-            if (Minecraft.getMinecraft().getIntegratedServer()!=null) {
+            if (Utils.getIntegratedServer()!=null) {
                 //客户端内置服务器
                 int fn = 0;
                 if (!new File("chatimages/").exists())
@@ -70,7 +62,7 @@ public class HttpApiUpload extends HttpServlet {
                 Utils.WriteFile("chatimages/"+fn,byteArray);
 
                 cid.url="ci:lo/"+fn;
-                sendText(Minecraft.getMinecraft().getIntegratedServer(), cid.getChatMsg());
+                sendText(Utils.getIntegratedServer(), cid.getChatMsg());
             } else {
                 //客户端
                 try {
@@ -78,7 +70,7 @@ public class HttpApiUpload extends HttpServlet {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                Minecraft.getMinecraft().player.sendChatMessage(cid.toString());
+                FMLClientHandler.instance().getClientPlayerEntity().sendChatMessage(cid.toString());
             }
         }else {
             //服务器

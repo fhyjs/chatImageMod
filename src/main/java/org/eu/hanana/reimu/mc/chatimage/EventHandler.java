@@ -8,11 +8,14 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -55,6 +58,47 @@ public class EventHandler {
                 }
             });
         }
+    }
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onMouseInput(MouseInputEvent.Pre event){
+        int i = Mouse.getEventX() * event.getGui().width / event.getGui().mc.displayWidth;
+        int j = event.getGui().height - Mouse.getEventY() * event.getGui().height / event.getGui().mc.displayHeight - 1;
+        int k = Mouse.getEventButton();
+
+        if (Mouse.getEventButtonState())
+        {
+            this.onMouseClicked(i, j, k, event);
+        }
+    }
+    @SideOnly(Side.CLIENT)
+    public void onMouseClicked(int mouseX, int mouseY, int mouseButton, MouseInputEvent.Pre event){
+        if (mouseButton == 0)
+        {
+            ITextComponent itextcomponent = event.getGui().mc.ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
+
+            if (itextcomponent != null && this.handleComponentClick(itextcomponent,event))
+            {
+                event.setCanceled(true);
+            }
+        }
+    }
+    @SideOnly(Side.CLIENT)
+    public boolean handleComponentClick(ITextComponent component, MouseInputEvent.Pre event){
+        ClickEvent clickevent = component.getStyle().getClickEvent();
+        if (clickevent != null) {
+            if (clickevent.getAction() == Actions.VIEW_IMAGE) {
+                try {
+                    ChatImage ci = ChatImage.getChatImage(clickevent.getValue());
+                    FMLClientHandler.instance().getClient().displayGuiScreen(new ScreenImgViewer(ci,event.getGui()));
+                } catch (MalformedURLException e) {
+                    component.appendSibling(new TextComponentString(e.toString()).setStyle(new Style().setColor(TextFormatting.RED)));
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        }
+        return false;
     }
     @SideOnly(Side.CLIENT)
     @SubscribeEvent

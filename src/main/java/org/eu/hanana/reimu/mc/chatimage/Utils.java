@@ -1,13 +1,19 @@
 package org.eu.hanana.reimu.mc.chatimage;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.Display;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -68,6 +74,61 @@ public class Utils {
         }
     }
     private static boolean SEND_FINISH=true;
+    public static MinecraftServer getIntegratedServer(){
+        Object minecraft;
+        try {
+            Class<?> mcc;
+            mcc = Class.forName("net.minecraft.client.Minecraft");
+            Method mci= ObfuscationReflectionHelper.findMethod(mcc,"func_71410_x",mcc,void.class);
+            minecraft = mci.invoke(null);
+            Object r = ObfuscationReflectionHelper.findMethod(mcc,"func_71401_C",Class.forName("net.minecraft.server.integrated.IntegratedServer"),void.class).invoke(minecraft);
+            if (r instanceof MinecraftServer)
+                return (MinecraftServer) r;
+        } catch (Exception e) {
+            return null;
+        }
+
+        return null;
+    }
+    /*
+    public static EntityPlayer getClPlayer(){
+        Object minecraft;
+        try {
+            Class<?> mcc;
+            mcc = Class.forName("net.minecraft.client.Minecraft");
+            Method mci= ObfuscationReflectionHelper.findMethod(mcc,"func_71410_x",mcc,void.class);
+            minecraft = mci.invoke(null);
+            Object r = ObfuscationReflectionHelper.getPrivateValue(mcc.);
+            if (r instanceof MinecraftServer)
+                return (MinecraftServer) r;
+        } catch (Exception e) {
+            return null;
+        }
+
+        return null;
+    }
+     */
+    public static BufferedImage scaleImage(BufferedImage originalImage, int newWidth, int newHeight) {
+        // 创建一个新的 BufferedImage，用于存储缩放后的图像
+        BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, originalImage.getType());
+
+        // 获取图形上下文对象
+        Graphics2D g2d = scaledImage.createGraphics();
+
+        // 使用抗锯齿渲染
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        // 创建仿射变换对象并进行非等比例缩放
+        double scaleX = (double)newWidth / originalImage.getWidth();
+        double scaleY = (double)newHeight / originalImage.getHeight();
+        AffineTransform transform = AffineTransform.getScaleInstance(scaleX, scaleY);
+        g2d.drawImage(originalImage, transform, null);
+
+        // 释放图形上下文资源
+        g2d.dispose();
+
+        return scaledImage;
+    }
     public static String SendLByte(byte[] bytes) throws InterruptedException {
         int maxPacketSize = 32700; // 限制单个数据包大小
 

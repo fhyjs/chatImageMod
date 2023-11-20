@@ -9,6 +9,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
+import org.eu.hanana.reimu.mc.chatimage.Utils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -47,8 +48,8 @@ public class HttpApiSend extends HttpServlet {
                 String content = textElement.get("content").getAsString();
                 if (type == 1) {
                     if (FMLCommonHandler.instance().getSide().isClient()){
-                        if (Minecraft.getMinecraft().getIntegratedServer()!=null)
-                            sendText(Minecraft.getMinecraft().getIntegratedServer(),content);
+                        if (Utils.getIntegratedServer() !=null)
+                            sendText(Utils.getIntegratedServer(),content);
                         else
                             Minecraft.getMinecraft().player.sendChatMessage(content);
                     }else

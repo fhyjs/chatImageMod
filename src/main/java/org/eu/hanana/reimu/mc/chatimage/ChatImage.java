@@ -9,6 +9,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.eu.hanana.reimu.mc.chatimage.enums.Actions;
@@ -33,11 +34,30 @@ public class ChatImage {
     public int height,width;
     public ImageStatus status;
     private ResourceLocation image;
+    private ResourceLocation originalImg;
+    private BufferedImage originalBI;
     public URL source;
     public ChatImage(){
         status= ImageStatus.NEW;
     }
 
+    public ResourceLocation getOriginalImg() {
+        if (originalImg==null){
+            if (status.equals(ImageStatus.OK)) {
+                originalImg=Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("chat_image_original", new DynamicTexture(Objects.requireNonNull(originalBI)));
+            }
+            if (status.equals(ImageStatus.NEW)){
+                getImage();
+            }
+        }
+        return originalImg;
+    }
+    public void delOriginalImg() {
+        if (originalImg!=null){
+            Minecraft.getMinecraft().getTextureManager().deleteTexture(originalImg);
+            originalImg=null;
+        }
+    }
     public ResourceLocation getImage() {
         if (bufferedImagesRl.containsKey(source)) return bufferedImagesRl.get(source);
         if (status== ImageStatus.OK){
@@ -101,6 +121,7 @@ public class ChatImage {
         }
         private void writeImage(BufferedImage bi) throws InterruptedException {
             if (bi != null) {
+                originalBI=bi;
                 bi=scaleImage(bi,width,height);
                 AtomicReference<ResourceLocation> rl1 = new AtomicReference<>();
                 BufferedImage finalBi = bi;
@@ -203,7 +224,13 @@ public class ChatImage {
 
         }
         public ITextComponent getChatMsg(){
-            return new TextComponentString(FMLCommonHandler.instance().getCurrentLanguage().equalsIgnoreCase("zh_cn")?"[图片]":"[photo]").setStyle(new Style().setColor(TextFormatting.GREEN).setHoverEvent(new HoverEvent(Actions.SHOW_IMAGE,new TextComponentString(this.toString()))));
+            return new TextComponentString(
+                    FMLCommonHandler.instance().getCurrentLanguage().equalsIgnoreCase("zh_cn")?"[图片]":"[photo]").setStyle(
+                            new Style()
+                                    .setColor(TextFormatting.GREEN)
+                                    .setHoverEvent(new HoverEvent(Actions.SHOW_IMAGE,new TextComponentString(this.toString())))
+                                    .setClickEvent(new ClickEvent(Actions.VIEW_IMAGE,this.toString()))
+            );
         }
         @Override
         public String toString() {
