@@ -19,10 +19,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TelnetServer implements Runnable{
     public static Map<String,ClientHandler> funcs = new HashMap<>();
+    public static final List<ClientHandler> HANDLERS = new ArrayList<>();
     public TelnetServer(){
         super();
     }
@@ -92,7 +94,7 @@ public class TelnetServer implements Runnable{
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),StandardCharsets.UTF_8));
 
                 //out.println("hello from The Project Jntm mod!");
-
+                HANDLERS.add(this);
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     //inputLine = new String(inputLine.getBytes(StandardCharsets.US_ASCII),StandardCharsets.UTF_8);
@@ -114,6 +116,7 @@ public class TelnetServer implements Runnable{
             close();
         }
         private void close(){
+            HANDLERS.remove(this);
             for (String s : new ArrayList<>(TelnetServer.funcs.keySet())) {
                 if (TelnetServer.funcs.get(s)==this)
                     TelnetServer.funcs.remove(s);

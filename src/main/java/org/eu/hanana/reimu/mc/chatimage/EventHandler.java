@@ -340,8 +340,11 @@ public class EventHandler {
         String message = event.getMessage();
         if (message.startsWith("/")) return;
 
+        String str = message.startsWith("#") ? message.substring(1) : message;
         for (WsHandler handler : HANDLERS)
-            WsApiBase.sendStrMsg(handler.getSession(),message.startsWith("#")?message.substring(1):message);
+            WsApiBase.sendStrMsg(handler.getSession(), str);
+        for (TelnetServer.ClientHandler handler : TelnetServer.HANDLERS)
+            handler.send("{\"operation\":\"message\",\"payload\":{\"msg\":\""+str+"\",\"sender\":\""+player.getDisplayNameString()+"\"}}");
 
         // 定义正则表达式模式，匹配CI{...}形式的内容
         String pattern = "(CI\\{.*?\\})";
