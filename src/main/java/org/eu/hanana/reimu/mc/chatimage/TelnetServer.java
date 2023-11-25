@@ -1,5 +1,6 @@
 package org.eu.hanana.reimu.mc.chatimage;
 
+import com.google.gson.Gson;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IThreadListener;
@@ -8,6 +9,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.eu.hanana.reimu.mc.chatimage.telnet.TelnetData;
+import org.eu.hanana.reimu.mc.chatimage.telnet.TelnetProcessor;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -25,7 +28,7 @@ public class TelnetServer implements Runnable{
     }
     @Override
     public void run() {
-        int portNumber = 25555; // Telnet默认端口号为23
+        int portNumber = ConfigCore.telnetPort; // Telnet默认端口号为23
 
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             System.out.println("Telnet was started on port" + portNumber);
@@ -53,16 +56,13 @@ public class TelnetServer implements Runnable{
                 out.println(str);
         }
         public String exec(String cmd){
-            if (cmd.startsWith(".")){
-                interal(cmd.substring(1));
-                return "";
-            }
-            if (cmd.startsWith("#")){
-                regFunc(cmd.substring(1));
-                return "";
-            }
+            Gson gson = new Gson();
+            TelnetData data = gson.fromJson(cmd,TelnetData.class);
+            TelnetProcessor telnetProcessor = new TelnetProcessor(data,this);
+            Thread thread = new Thread(telnetProcessor);
+            thread.setName("TelnetProcessor-"+ telnetProcessor);
+            thread.start();
             //getServer().commandManager.executeCommand(this,cmd);
-            executeCommandInMainThread(this,cmd);
             //out.println(code);
             return "";
         }
@@ -99,12 +99,15 @@ public class TelnetServer implements Runnable{
                     if ("exit".equalsIgnoreCase(inputLine)) {
                         break;
                     }
-
-                    exec(inputLine);
-
+                    try {
+                        exec(inputLine);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
 
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 System.err.println("processing <" + clientSocket.getInetAddress().getHostAddress() + "> with an error:" + e.getMessage());
                 close();
             }

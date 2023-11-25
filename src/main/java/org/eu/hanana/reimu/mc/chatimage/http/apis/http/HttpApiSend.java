@@ -71,7 +71,7 @@ public class HttpApiSend extends HttpServlet {
                 "    \"result\": 0\n" +
                 "}");
     }
-    public void sendText(MinecraftServer minecraftServer,String text){
+    public static void sendText(MinecraftServer minecraftServer,String text){
         minecraftServer.sendMessage(new TextComponentString(text));
         for (EntityPlayerMP player : minecraftServer.getPlayerList().getPlayers()) {
             player.sendMessage(new TextComponentString(text));

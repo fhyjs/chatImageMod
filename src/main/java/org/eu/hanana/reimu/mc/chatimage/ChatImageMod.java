@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-@Mod(modid = ChatImageMod.MODID, name = ChatImageMod.NAME, version = ChatImageMod.VERSION)
+@Mod(modid = ChatImageMod.MODID, name = ChatImageMod.NAME, version = ChatImageMod.VERSION,guiFactory = "org.eu.hanana.reimu.mc.chatimage.CIMGuiFactory")
 public class ChatImageMod
 {
     public static SimpleNetworkWrapper NETWORK = null;
@@ -39,11 +39,18 @@ public class ChatImageMod
     public void preInit(FMLPreInitializationEvent event)
     {
         logger = event.getModLog();
-        if (Utils.isClassExists("org.eclipse.jetty.server.Server")) {
-            httpServer = HttpServer.newHttpServer(25566);
-            httpServer.start();
-        }else {
-            logger.warn("No Jetty Plugin!");
+        ConfigCore.loadConfig(event);
+        System.out.println(System.getProperty("java.class.path"));
+        if (ConfigCore.isenabledTelnet) {
+
+            new Thread(new TelnetServer()).start();
+
+            if (Utils.isClassExists("org.eclipse.jetty.server.Server") && Utils.isClassExists("javax.servlet.Servlet")) {
+                httpServer = HttpServer.newHttpServer(25566);
+                httpServer.start();
+            } else {
+                logger.warn("No Jetty Plugin!");
+            }
         }
     }
     private void registerMessage(){
