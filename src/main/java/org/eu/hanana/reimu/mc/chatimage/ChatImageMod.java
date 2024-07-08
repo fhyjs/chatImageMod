@@ -30,9 +30,10 @@ public class ChatImageMod
     public static ChatImageMod INSTANCE;
     public static Logger logger;
     public HttpServer httpServer;
+    public org.eu.hanana.reimu.mc.chatimage.EventHandler eventHandler;
     public ChatImageMod(){
         INSTANCE = this;
-        MinecraftForge.EVENT_BUS.register(new org.eu.hanana.reimu.mc.chatimage.EventHandler());
+        MinecraftForge.EVENT_BUS.register(eventHandler=new org.eu.hanana.reimu.mc.chatimage.EventHandler());
     }
 
     @EventHandler

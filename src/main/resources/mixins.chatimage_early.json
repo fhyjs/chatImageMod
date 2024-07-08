@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "org.eu.hanana.reimu.mc.chatimage.mixin",
+  "minVersion": "0.8",
+  "setSourceFile": true,
+  "priority": 0,
+  "refmap": "mixins.chatimage.refmap.json",
+  "mixins": [
+    "MixinPacketBuffer"
+  ],
+  "client": [
+  ],
+  "server": [
+  ]
+}

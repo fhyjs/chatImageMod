@@ -16,6 +16,7 @@ import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -345,6 +346,12 @@ public class EventHandler {
             WsApiBase.sendStrMsg(handler.getSession(), str);
         for (TelnetServer.ClientHandler handler : TelnetServer.HANDLERS)
             handler.send("{\"operation\":\"message\",\"payload\":{\"msg\":\""+str+"\",\"sender\":\""+player.getDisplayNameString()+"\"}}");
+
+    }
+    public void onServerSendMessage(ServerChatEvent event) {
+        // 获取聊天消息内容
+        String message = event.getMessage();
+        if (message.startsWith("/")) return;
 
         // 定义正则表达式模式，匹配CI{...}形式的内容
         String pattern = "(CI\\{.*?\\})";
