@@ -395,6 +395,7 @@ public class EventHandler {
                 try {
                     ChatImage ci = ChatImage.getChatImage(content);
                     textComponent.appendSibling(new ChatImage.ChatImageData(ci).getChatMsg());
+                    ChatImageMod.logger.info("CI_JSON found! Making a TextComponent. _ChatImageMod_");
                 } catch (MalformedURLException e) {
                     textComponent.appendSibling(new TextComponentString(e.toString()).setStyle(new Style().setColor(TextFormatting.RED)));
                     e.printStackTrace();

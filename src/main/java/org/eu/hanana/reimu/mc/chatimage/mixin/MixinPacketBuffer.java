@@ -2,11 +2,16 @@ package org.eu.hanana.reimu.mc.chatimage.mixin;
 
 import io.netty.handler.codec.EncoderException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
@@ -23,11 +28,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
-@Mixin(PacketBuffer.class)
+@Mixin(NetHandlerPlayServer.class)
 public abstract class MixinPacketBuffer {
-    @Inject(at=@At("HEAD"),method = "writeTextComponent",cancellable = true)
-    private void writeTextComponent(ITextComponent component, CallbackInfoReturnable<PacketBuffer> cir) {
-        ServerChatEvent event;
+    @Inject(at=@At("HEAD"),method = "sendPacket",cancellable = true)
+    private void writeTextComponent(Packet<?> packetIn, CallbackInfo ci) {
+        if (packetIn instanceof SPacketChat) {
+            ITextComponent component=((SPacketChat) packetIn).getChatComponent();
+            if (ITextComponent.Serializer.componentToJson(component).contains("!*CIpd*!")){
+                return;
+            }
+            ServerChatEvent event;
             if (component.getUnformattedText().startsWith("<")) {
                 String unformattedText = component.getUnformattedText();
                 Pattern pattern = Pattern.compile("<(.*?)>");
@@ -41,18 +51,17 @@ public abstract class MixinPacketBuffer {
                     ChatImageMod.logger.warn("Can not get message sender!");
                 }
                 if (playerByUsername != null) {
-                    unformattedText=unformattedText.substring(playerByUsername.getName().length()+3);
+                    unformattedText = unformattedText.substring(playerByUsername.getName().length() + 3);
                     ChatImageMod.INSTANCE.eventHandler.onServerSendMessage(event = new ServerChatEvent(playerByUsername, unformattedText, component));
                     component = event.getComponent();
-                    ChatImageMod.logger.info("CI_JSON found! Making a TextComponent. _ChatImageMod_");
                 }
             }
-        cir.setReturnValue(this.writeString(ITextComponent.Serializer.componentToJson(component)));
-        cir.cancel();
-    }
-    @Shadow
-    public PacketBuffer writeString(String string)
-    {
-        return null;
+            TextComponentString iTextComponents = new TextComponentString("");
+            iTextComponents.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,new TextComponentString("!*CIpd*!")));
+            component.appendSibling(iTextComponents);
+            packetIn=new SPacketChat(component,((SPacketChat) packetIn).getType());
+            ((NetHandlerPlayServer) ((Object) this)).sendPacket(packetIn);
+            ci.cancel();
+        }
     }
 }
