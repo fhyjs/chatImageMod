@@ -1,0 +1,16 @@
+{
+  "gui.ci.title": "chatImage manager",
+  "gui.ci.send": "send",
+  "gui.ci.text": "text",
+  "gui.ci.width": "width",
+  "gui.ci.height": "height",
+  "gui.ci.info": "information",
+  "pack.ci.dec": "ci mod pack",
+  "msg.ci.photo": "[photo]",
+  "msg.ci.OK": "",
+  "msg.ci.ERROR": "§4ERROR",
+  "msg.ci.WAIT": "§3LOADING",
+  "gui.ci.add": "add",
+  "gui.ci.gen": "text to send"
+
+}

@@ -1,0 +1,15 @@
+{
+  "gui.ci.title": "聊天图片管理",
+  "gui.ci.send": "发送",
+  "gui.ci.text": "文本",
+  "gui.ci.gen": "聊天内容",
+  "gui.ci.width": "宽",
+  "gui.ci.height": "高",
+  "pack.ci.dec": "聊天图片mod纹理包",
+  "gui.ci.info": "图片信息",
+  "gui.ci.add": "添加",
+  "msg.ci.photo": "[图片]",
+  "msg.ci.OK": "",
+  "msg.ci.ERROR": "§4加载失败",
+  "msg.ci.WAIT": "§3加载中"
+}
