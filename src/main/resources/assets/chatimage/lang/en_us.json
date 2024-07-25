@@ -11,6 +11,8 @@
   "msg.ci.ERROR": "§4ERROR",
   "msg.ci.WAIT": "§3LOADING",
   "gui.ci.add": "add",
+  "gui.ci.clear": "clear cache",
+  "gui.ci.upload": "upload",
   "gui.ci.gen": "text to send"
 
 }

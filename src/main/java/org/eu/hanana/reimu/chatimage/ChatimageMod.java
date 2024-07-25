@@ -22,8 +22,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eu.hanana.reimu.chatimage.gui.MenuCiManager;
 import org.eu.hanana.reimu.chatimage.gui.ScreenCiManager;
-import org.eu.hanana.reimu.chatimage.networking.HandlerOpenGui;
-import org.eu.hanana.reimu.chatimage.networking.PayloadOpenGui;
+import org.eu.hanana.reimu.chatimage.gui.ScreenFileChooser;
+import org.eu.hanana.reimu.chatimage.networking.*;
 
 import java.util.function.Supplier;
 
@@ -42,6 +42,7 @@ public class ChatimageMod {
             MOD_ID
     );
     public static final Supplier<MenuType<MenuCiManager>> CI_MANAGER_MENU = MENUS.register("cim_menu", () -> new MenuType<>(MenuCiManager::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<MenuCiManager>> FILE_CHOOSER_MENU = MENUS.register("cim_file_chooser", () -> new MenuType<>(MenuCiManager::new, FeatureFlags.DEFAULT_FLAGS));
     public ChatimageMod(IEventBus modBus, ModContainer container) {
         NeoForge.EVENT_BUS.register(new EventHandler());
         modBus.addListener(this::registerScreens);
@@ -59,11 +60,20 @@ public class ChatimageMod {
                         HandlerOpenGui::handleData
                 )
         );
+        registrar.playBidirectional(
+                PayloadUpload.TYPE,
+                PayloadUpload.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        HandlerUploadCl::handleData,
+                        HandlerUploadSv::handleData
+                )
+        );
     }
     private void init(FMLCommonSetupEvent event){
     }
     private void registerScreens(RegisterMenuScreensEvent event) {
 
         event.register(CI_MANAGER_MENU.get(), ScreenCiManager::new);
+        event.register(FILE_CHOOSER_MENU.get(), ScreenFileChooser::new);
     }
 }

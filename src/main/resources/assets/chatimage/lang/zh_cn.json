@@ -11,5 +11,7 @@
   "msg.ci.photo": "[图片]",
   "msg.ci.OK": "",
   "msg.ci.ERROR": "§4加载失败",
-  "msg.ci.WAIT": "§3加载中"
+  "msg.ci.WAIT": "§3加载中",
+  "gui.ci.clear": "清除缓存",
+  "gui.ci.upload": "上传"
 }
