@@ -25,6 +25,7 @@ import org.eu.hanana.reimu.chatimage.gui.ScreenCiManager;
 import org.eu.hanana.reimu.chatimage.gui.ScreenFileChooser;
 import org.eu.hanana.reimu.chatimage.networking.*;
 
+import java.io.File;
 import java.util.function.Supplier;
 
 import static org.eu.hanana.reimu.chatimage.ChatimageMod.MOD_ID;
@@ -70,6 +71,12 @@ public class ChatimageMod {
         );
     }
     private void init(FMLCommonSetupEvent event){
+        try {
+            Util.deleteDirectory(new File(".","chatimage"));
+        }catch (Exception e){
+            logger.error(e);
+        }
+
     }
     private void registerScreens(RegisterMenuScreensEvent event) {
 

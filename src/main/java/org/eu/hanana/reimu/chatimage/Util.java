@@ -30,11 +30,40 @@ public class Util {
         waitReply("OK");
         return String.valueOf(bytes.length);
     }
+    /**
+     * 递归删除目录及其内容
+     *
+     * @param directory 要删除的目录
+     * @return 如果目录及其内容删除成功，则返回 true；否则返回 false
+     */
+    public static boolean deleteDirectory(File directory) {
+        if (!directory.exists()) {
+            return false;
+        }
+
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        // 递归删除子目录
+                        deleteDirectory(file);
+                    } else {
+                        // 删除文件
+                        file.delete();
+                    }
+                }
+            }
+        }
+
+        // 删除空目录
+        return directory.delete();
+    }
     public static void waitReply(String opt) throws InterruptedException {
         int time=0;
-        while (opt.equals(reply)){
-            Thread.sleep(100);
-            time+=100;
+        while (!opt.equals(reply)){
+            Thread.sleep(10);
+            time+=10;
             if (time>5000)
                 throw new RuntimeException("TIMEOUT");
         }

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,11 +25,13 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
     public File cDir;
     private EditBox pathName;
     private EditBox fileName;
+    private Screen parent;
     private StringListWidget.StringEntry oldSel;
     public ScreenFileChooser(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
         cDir=new File(".");
+        parent=null;
     }
 
     public void setCallback(Callback callback) {
@@ -37,6 +40,10 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
 
     public Callback getCallback() {
         return callback;
+    }
+
+    public void setParent(Screen parent) {
+        this.parent = parent;
     }
 
     @Override
@@ -74,6 +81,27 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
 
         fileName = addRenderableWidget(new EditBox(this.font,getGuiLeft()+10,getGuiTop()+getYSize()-25,140,20,Component.literal("FileName")));
         fileName.setMaxLength(100);
+        addRenderableWidget(Button.builder(Component.translatable("gui.ok"),(button)->{
+            try {
+                var result = new File(cDir,fileName.getValue());
+                if (result.isDirectory()||!result.exists()){
+                    throw new RuntimeException("Not a file/不是文件");
+                }
+                ChatimageMod.logger.info("FileChooser picked {} .",result.getAbsolutePath());
+                if (callback!=null)
+                    callback.call(result.getAbsolutePath());
+            }catch (Exception e){
+                e.printStackTrace();
+                getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
+            }
+        }).bounds(getGuiLeft()+getXSize()-50,getGuiTop()+getYSize()-25,30,20).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.cancel"),(button)->{
+            try {
+                getMinecraft().setScreen(parent);
+            }catch (Exception e){
+                getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
+            }
+        }).bounds(getGuiLeft()+getXSize()-90,getGuiTop()+getYSize()-25,30,20).build());
 
         stringListWidget.add(new ScreenFileChooser.FileString(new File(cDir,"..")));
         try {

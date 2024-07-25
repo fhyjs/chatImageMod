@@ -17,6 +17,7 @@ import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.Util;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
@@ -53,16 +54,27 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
         }).bounds(getGuiLeft()+getXSize()-90,getGuiTop()+getYSize()-60,40,20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.upload"),(button)->{
             ScreenFileChooser fileChooser = new ScreenFileChooser(menu, getMinecraft().player.getInventory(), Component.literal("FileChooser"));
+            fileChooser.setParent(this);
             getMinecraft().setScreen(fileChooser);
             fileChooser.setCallback((path)->{
                 getMinecraft().setScreen(ScreenCiManager.this);
-                try {
-                    url.setValue(Util.upload(path));
-                    getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("SUCCESS/完成"),Component.literal("OK")));
-                } catch (Throwable e) {
-                    Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
-                }
-
+                Thread thread = new Thread(()->{
+                    try {
+                        url.setValue(Util.upload(path));
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    Minecraft.getInstance().execute(()->{
+                        getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("SUCCESS/完成"),Component.literal("OK")));
+                    });
+                });
+                thread.setUncaughtExceptionHandler((t,e)->{
+                    Minecraft.getInstance().execute(()->{
+                        Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
+                    });
+                });
+                getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("WORKING/处理中"),Component.literal("DO NOT CLOSE THIS WINDOW/不要关闭本窗口")));
+                thread.start();
             });
 
 
