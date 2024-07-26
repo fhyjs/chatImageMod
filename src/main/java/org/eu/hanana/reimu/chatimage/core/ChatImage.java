@@ -73,66 +73,68 @@ public class ChatImage {
         BufferedTexture.clear();
         BufferedChatImage.clear();
     }
+    @Nullable
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture() {
         if (status==ImageStatus.OK&&BufferedTexture.containsKey(url.toString())){
             return BufferedTexture.get(url.toString());
         }else if (status==ImageStatus.NEW){
-            status=ImageStatus.WAIT;
             new Thread(this::downloadImg).start();
         }
         return null;
     }
     @OnlyIn(Dist.CLIENT)
     public void downloadImg(){
+        status=ImageStatus.WAIT;
         try {
             URLConnection urlConnection = url.openConnection();
             // 读取输入流
-            try (InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-                byte[] dataBuffer = new byte[1024];
-                int bytesRead;
+            InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
 
-                while ((bytesRead = inputStream.read(dataBuffer)) != -1) {
-                    outputStream.write(dataBuffer, 0, bytesRead);
-                }
-
-                byte[] abyte = outputStream.toByteArray();
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(abyte));
-
-                // 创建一个新的图片缓冲区，用于存放缩放后的图片
-                BufferedImage outputImage = new BufferedImage(w, h, image.getType());
-
-                // 获取Graphics2D对象，用于在图片上绘制
-                Graphics2D g2d = outputImage.createGraphics();
-                // 设置渲染质量（高质量）
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                // 执行缩放操作
-                g2d.drawImage(image, 0, 0, w, h, null);
-
-                // 释放资源
-                g2d.dispose();
-
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(outputImage,"png",byteArrayOutputStream);
-                abyte=byteArrayOutputStream.toByteArray();
-
-                ByteBuffer bytebuffer = MemoryUtil.memAlloc(abyte.length);
-                NativeImage read;
-                try {
-                    read = NativeImage.read(bytebuffer.put(abyte).flip());
-                } catch (IOException ioexception) {
-                    throw new IOException(ioexception);
-                } finally {
-                    MemoryUtil.memFree(bytebuffer);
-                }
-                ResourceLocation resourcelocation = ResourceLocation.fromNamespaceAndPath(ChatimageMod.MOD_ID, "dynamic/ci/" + BufferedTexture.size());
-                Minecraft.getInstance().getTextureManager().register(resourcelocation, new DynamicTexture(read));
-                BufferedTexture.put(url.toString(), resourcelocation);
-                status=ImageStatus.OK;
+            while ((bytesRead = inputStream.read(dataBuffer)) != -1) {
+                outputStream.write(dataBuffer, 0, bytesRead);
             }
-        } catch (IOException e) {
+
+            byte[] abyte = outputStream.toByteArray();
+            BufferedImage image = ImageIO.read(new ByteArrayInputStream(abyte));
+
+            // 创建一个新的图片缓冲区，用于存放缩放后的图片
+            BufferedImage outputImage = new BufferedImage(w, h, image.getType());
+
+            // 获取Graphics2D对象，用于在图片上绘制
+            Graphics2D g2d = outputImage.createGraphics();
+            // 设置渲染质量（高质量）
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            // 执行缩放操作
+            g2d.drawImage(image, 0, 0, w, h, null);
+
+            // 释放资源
+            g2d.dispose();
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(outputImage,"png",byteArrayOutputStream);
+            abyte=byteArrayOutputStream.toByteArray();
+
+            ByteBuffer bytebuffer = MemoryUtil.memAlloc(abyte.length);
+            NativeImage read;
+            try {
+                read = NativeImage.read(bytebuffer.put(abyte).flip());
+            } catch (IOException ioexception) {
+                throw new IOException(ioexception);
+            } finally {
+                MemoryUtil.memFree(bytebuffer);
+            }
+            ResourceLocation resourcelocation = ResourceLocation.fromNamespaceAndPath(ChatimageMod.MOD_ID, "dynamic/ci/" + BufferedTexture.size());
+            Minecraft.getInstance().getTextureManager().register(resourcelocation, new DynamicTexture(read));
+            BufferedTexture.put(url.toString(), resourcelocation);
+            status=ImageStatus.OK;
+
+        } catch (Throwable e) {
+            e.printStackTrace();
             ChatimageMod.logger.error(e);
             status=ImageStatus.ERROR;
             if (FMLEnvironment.dist.isClient()){

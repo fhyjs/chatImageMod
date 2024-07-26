@@ -13,5 +13,9 @@
   "msg.ci.ERROR": "§4加载失败",
   "msg.ci.WAIT": "§3加载中",
   "gui.ci.clear": "清除缓存",
-  "gui.ci.upload": "上传"
+  "gui.ci.upload": "上传",
+  "msg.ci.status.new": "§e[等待线程启动]",
+  "msg.ci.status.ok": "",
+  "msg.ci.status.error": "§4[错误]",
+  "msg.ci.status.wait": "§e[等待图片下载]"
 }

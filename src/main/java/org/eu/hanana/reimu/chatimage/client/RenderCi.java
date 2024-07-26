@@ -35,7 +35,7 @@ public class RenderCi {
                 return;
             }
             List<FormattedCharSequence> split = new ArrayList<>();
-            split.addAll(pFont.split(Component.translatable("msg.ci.status."+chatImage.status), Math.max(guiGraphics.guiWidth() / 2, 200)));
+            split.addAll(pFont.split(Component.translatable("msg.ci.status."+chatImage.status.toString().toLowerCase()), Math.max(guiGraphics.guiWidth() / 2, 200)));
             split.addAll(pFont.split(Component.literal(chatImage.info), Math.max(guiGraphics.guiWidth() / 2, 200)));
             List<ClientTooltipComponent> pComponents = new ArrayList<>();
             for (FormattedCharSequence formattedCharSequence : split) {

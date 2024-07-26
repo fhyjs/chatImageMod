@@ -13,6 +13,9 @@
   "gui.ci.add": "add",
   "gui.ci.clear": "clear cache",
   "gui.ci.upload": "upload",
-  "gui.ci.gen": "text to send"
-
+  "gui.ci.gen": "text to send",
+  "msg.ci.status.new": "§e[waiting for thread starting]",
+  "msg.ci.status.ok": "",
+  "msg.ci.status.error": "§4[error]",
+  "msg.ci.status.wait": "§e[waiting for download texture]"
 }

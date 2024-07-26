@@ -2,6 +2,9 @@ package org.eu.hanana.reimu.chatimage;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.eu.hanana.reimu.chatimage.networking.HandlerDownloadCl;
+import org.eu.hanana.reimu.chatimage.networking.HandlerUploadCl;
+import org.eu.hanana.reimu.chatimage.networking.PayloadDownload;
 import org.eu.hanana.reimu.chatimage.networking.PayloadUpload;
 
 import javax.swing.*;
@@ -9,13 +12,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class Util {
     public static String reply;
+    public static byte[][] DOWNLOAD_BUFFER=null;
     public static String upload(String path) throws IOException, InterruptedException {
         byte[] bytes = readFileToByteArray(new File(path));
         if (bytes.length==0){
@@ -28,7 +35,62 @@ public class Util {
             PacketDistributor.sendToServer(new PayloadUpload("UPLOAD",i,split.get(i)));
         }
         waitReply("OK");
-        return String.valueOf(bytes.length);
+        return "ci:lo/"+ new String(HandlerUploadCl.payloadUpload.bytes());
+    }
+    public static byte[] download(String path) throws IOException, InterruptedException {
+        while (DOWNLOAD_BUFFER!=null){
+            Thread.sleep(100);
+        }
+        byte[][] bytes1 = null;
+        try {
+            PacketDistributor.sendToServer(new PayloadDownload("START",0,path.getBytes(StandardCharsets.UTF_8)));
+            waitReply("R-START");
+            DOWNLOAD_BUFFER=new byte[HandlerDownloadCl.payloadUpload.pos()][];
+            int time=0;
+            PacketDistributor.sendToServer(new PayloadDownload("DL",0,new byte[0]));
+            while (true){
+                Thread.sleep(10);
+                time+=10;
+                if (time>5000)
+                    throw new RuntimeException("TIMEOUT");
+                var ok = true;
+                for (byte[] bytes : DOWNLOAD_BUFFER) {
+                    if (bytes==null)
+                        ok=false;
+                }
+                if (ok) break;
+            }
+            bytes1=DOWNLOAD_BUFFER;
+        }finally {
+            DOWNLOAD_BUFFER=null;
+        }
+
+        return mergeByteArrays(bytes1);
+    }
+    /**
+     * 合并二维字节数组为一维字节数组
+     *
+     * @param byteArrays 要合并的二维字节数组
+     * @return 合并后的字节数组
+     */
+    public static byte[] mergeByteArrays(byte[][] byteArrays) {
+        // 计算合并后的字节数组长度
+        int totalLength = 0;
+        for (byte[] array : byteArrays) {
+            totalLength += array.length;
+        }
+
+        // 创建合并后的字节数组
+        byte[] mergedArray = new byte[totalLength];
+
+        // 将每个子数组的内容复制到合并后的字节数组中
+        int currentIndex = 0;
+        for (byte[] array : byteArrays) {
+            System.arraycopy(array, 0, mergedArray, currentIndex, array.length);
+            currentIndex += array.length;
+        }
+
+        return mergedArray;
     }
     /**
      * 递归删除目录及其内容
