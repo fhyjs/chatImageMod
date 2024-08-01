@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
@@ -14,6 +15,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.eu.hanana.reimu.mc.chatimage.ChatImageMod;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,31 +32,21 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinPacketBuffer {
+    @Shadow
+    public EntityPlayerMP player;
     @Inject(at=@At("HEAD"),method = "sendPacket",cancellable = true)
     private void writeTextComponent(Packet<?> packetIn, CallbackInfo ci) {
         if (packetIn instanceof SPacketChat) {
-            ITextComponent component=((SPacketChat) packetIn).getChatComponent();
-            if (ITextComponent.Serializer.componentToJson(component).contains("!*CIpd*!")){
+            ITextComponent component = ObfuscationReflectionHelper.getPrivateValue(SPacketChat.class, ((SPacketChat) packetIn), "field_148919_a");
+            if (!component.getUnformattedText().contains("CI{")||ITextComponent.Serializer.componentToJson(component).contains("!*CIpd*!")){
                 return;
             }
             ServerChatEvent event;
-            if (component.getUnformattedText().startsWith("<")) {
+            if (player!=null) {
                 String unformattedText = component.getUnformattedText();
-                Pattern pattern = Pattern.compile("<(.*?)>");
-                Matcher matcher = pattern.matcher(unformattedText);
+                ChatImageMod.INSTANCE.eventHandler.onServerSendMessage(event = new ServerChatEvent(player, unformattedText, component));
+                component = event.getComponent();
 
-                EntityPlayerMP playerByUsername = null;
-                if (matcher.find()) {
-                    String result = matcher.group(1); // 获取第一个匹配到的括号里的内容
-                    playerByUsername = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUsername(result);
-                } else {
-                    ChatImageMod.logger.warn("Can not get message sender!");
-                }
-                if (playerByUsername != null) {
-                    unformattedText = unformattedText.substring(playerByUsername.getName().length() + 3);
-                    ChatImageMod.INSTANCE.eventHandler.onServerSendMessage(event = new ServerChatEvent(playerByUsername, unformattedText, component));
-                    component = event.getComponent();
-                }
             }
             TextComponentString iTextComponents = new TextComponentString("");
             iTextComponents.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,new TextComponentString("!*CIpd*!")));

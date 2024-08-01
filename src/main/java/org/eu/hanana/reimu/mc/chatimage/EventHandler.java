@@ -388,22 +388,25 @@ public class EventHandler {
         if (lastEnd < message.length()) {
             extractedContents.add(message.substring(lastEnd));
         }
-        ITextComponent textComponent = new TextComponentTranslation("chat.type.text", event.getPlayer().getName(), "");
-        // 打印List中的内容
-        for (String content : extractedContents) {
-            if (content.startsWith("CI{")) {
-                try {
-                    ChatImage ci = ChatImage.getChatImage(content);
-                    textComponent.appendSibling(new ChatImage.ChatImageData(ci).getChatMsg());
-                    ChatImageMod.logger.info("CI_JSON found! Making a TextComponent. _ChatImageMod_");
-                } catch (MalformedURLException e) {
-                    textComponent.appendSibling(new TextComponentString(e.toString()).setStyle(new Style().setColor(TextFormatting.RED)));
-                    e.printStackTrace();
-                }
+
+
+        ITextComponent textComponent = null;
+            textComponent = new TextComponentString("");
+            // 打印List中的内容
+            for (String content : extractedContents) {
+                if (content.startsWith("CI{")) {
+                    try {
+                        ChatImage ci = ChatImage.getChatImage(content);
+                        textComponent.appendSibling(new ChatImage.ChatImageData(ci).getChatMsg());
+                        ChatImageMod.logger.info("CI_JSON found! Making a TextComponent. _ChatImageMod_");
+                    } catch (MalformedURLException e) {
+                        textComponent.appendSibling(new TextComponentString(e.toString()).setStyle(new Style().setColor(TextFormatting.RED)));
+                        e.printStackTrace();
+                    }
+                } else
+                    textComponent.appendSibling(new TextComponentString(content));
             }
-            else
-                textComponent.appendSibling(new TextComponentString(content));
-        }
+
         event.setComponent(textComponent);
     }
 }
