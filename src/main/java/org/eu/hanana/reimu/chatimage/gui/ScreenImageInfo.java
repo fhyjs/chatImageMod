@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.Util;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
+import org.eu.hanana.reimu.chatimage.core.ImageStatus;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -42,8 +43,22 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
         addRenderableWidget(Button.builder(Component.literal("X"),(button)->{
             ScreenImageInfo.this.onClose();
         }).bounds(getGuiLeft()+getXSize()-30,getGuiTop()+7,15,15).build());
+        addRenderableWidget(Button.builder(Component.literal("+"),(button)->{
+            scale+=0.25f;
+        }).bounds(getGuiLeft()+getXSize()-80,getGuiTop()+23,15,15).build());
+        addRenderableWidget(Button.builder(Component.literal("O"),(button)->{
+            reset();
+        }).bounds(getGuiLeft()+getXSize()-60,getGuiTop()+23,15,15).build());
+        addRenderableWidget(Button.builder(Component.literal("-"),(button)->{
+            scale-=0.25f;
+        }).bounds(getGuiLeft()+getXSize()-40,getGuiTop()+23,15,15).build());
+        reset();
     }
-
+    private void reset(){
+        scale=1;
+        img_x = 10 + (getXSize() - 30) / 2f - image.w * scale / 2;
+        img_y = 50 + (getYSize() - 60) / 2f - image.h * scale / 2;
+    }
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (Minecraft.getInstance().options.keyInventory.matches(pKeyCode,pScanCode))
@@ -80,6 +95,16 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
         }
         graphics.pose().popPose();
         graphics.disableScissor();
+        var color = 0xff00d0;
+        if (image.status== ImageStatus.OK)
+            color=0x22ff00;
+        else if (image.status== ImageStatus.WAIT)
+            color=0xeeff00;
+        else if (image.status== ImageStatus.ERROR)
+            color=0xff2a00;
+        graphics.drawString(this.font, String.format("[%s]",image.status),47,7,color);
+        graphics.drawString(this.font, String.format("URL:%s",image.url),17,38,0);
+
     }
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
