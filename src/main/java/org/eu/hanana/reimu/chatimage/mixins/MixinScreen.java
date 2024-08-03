@@ -1,5 +1,7 @@
 package org.eu.hanana.reimu.chatimage.mixins;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -10,6 +12,7 @@ import net.minecraft.network.chat.Style;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.core.Actions;
+import org.eu.hanana.reimu.chatimage.gui.ScreenImageInfo;
 import org.eu.hanana.reimu.chatimage.networking.PayloadOpenGui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +53,11 @@ public abstract class MixinScreen extends AbstractContainerEventHandler implemen
         if (clickevent != null) {
             if (clickevent.getAction() == Actions.getViewImage()) {
                 ChatimageMod.logger.info("But the Chatimage Mod knows!");
-                PacketDistributor.sendToServer(new PayloadOpenGui(minecraft.player.getId(),"cim_image_info",clickevent.getValue().getBytes(StandardCharsets.UTF_8)));
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("action","open_gui");
+                jsonObject.addProperty("value", ScreenImageInfo.class.getName());
+                jsonObject.addProperty("extra", clickevent.getValue());
+                PacketDistributor.sendToServer(new PayloadOpenGui(minecraft.player.getId(),"chatimage:cim_image_info",jsonObject.toString().getBytes(StandardCharsets.UTF_8)));
             }
         }
     }

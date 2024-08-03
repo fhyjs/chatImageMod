@@ -85,6 +85,14 @@ public class ChatimageMod {
                         HandlerDownloadSv::handleData
                 )
         );
+        registrar.playBidirectional(
+                PayloadGetScreenExtra.TYPE,
+                PayloadGetScreenExtra.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        HandlerGetScreenExtra::handleData,
+                        HandlerGetScreenExtra::handleData
+                )
+        );
     }
     private void init(FMLCommonSetupEvent event){
         try {
@@ -110,7 +118,7 @@ public class ChatimageMod {
             } catch (Throwable ex) {
                 GLOBAL_PROTOCOL=false;
                 ex.printStackTrace();
-                logger.error("Failed to reg ci protocol!Using default!");
+                logger.error("Failed to add ci protocol!Using default!");
             }
         }
     }
@@ -134,6 +142,8 @@ public class ChatimageMod {
                 } else {
                     logger.warn("gui [{}] doesn't has data input!But it got data.", t.getClass());
                 }
+            }else {
+                logger.warn("gui [{}] has data input!But it got null.", t.getClass());
             }
             return t;
         }

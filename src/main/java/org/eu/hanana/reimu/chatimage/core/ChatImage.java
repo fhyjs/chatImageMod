@@ -48,7 +48,16 @@ public class ChatImage {
     }
     private ChatImage(String url,int w,int h,String info) throws MalformedURLException {
         this();
-        this.url= URI.create(url).toURL();
+        if (!ChatimageMod.GLOBAL_PROTOCOL) {
+            if (url.startsWith("ci:")) {
+                this.url = URL.of(URI.create(url), new ChatimageURLStreamHandlerFactory.ChatimageURLStreamHandler());
+                ChatimageMod.logger.warn("The ci protocol not add to system.May because by an error.Failed to a stable method.");
+            }else {
+                this.url=URI.create(url).toURL();
+            }
+        }else {
+            this.url=URI.create(url).toURL();
+        }
         this.w=w;
         this.h=h;
         this.info=info;

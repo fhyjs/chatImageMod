@@ -32,9 +32,7 @@ public class PayloadOpenGui implements CustomPacketPayload {
         this.extraData = extraData;
     }
     public PayloadOpenGui(int player_id, String gui) {
-        this.player_id = player_id;
-        this.gui = gui;
-        this.extraData = new byte[0];
+        this(player_id,gui,new byte[0]);
     }
     public int getPlayerId() {
         return player_id;
