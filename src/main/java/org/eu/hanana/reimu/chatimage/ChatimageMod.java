@@ -2,7 +2,10 @@ package org.eu.hanana.reimu.chatimage;
 
 import cpw.mods.cl.ModularURLHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -10,6 +13,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -17,10 +21,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eu.hanana.reimu.chatimage.core.ChatimageURLStreamHandlerFactory;
-import org.eu.hanana.reimu.chatimage.gui.MenuCiManager;
-import org.eu.hanana.reimu.chatimage.gui.ScreenCiManager;
-import org.eu.hanana.reimu.chatimage.gui.ScreenFileChooser;
+import org.eu.hanana.reimu.chatimage.gui.*;
 import org.eu.hanana.reimu.chatimage.networking.*;
+import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
 
 import java.io.File;
@@ -28,6 +31,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.eu.hanana.reimu.chatimage.ChatimageMod.MOD_ID;
@@ -45,8 +49,9 @@ public class ChatimageMod {
             MOD_ID
     );
     public static boolean GLOBAL_PROTOCOL=true;
-    public static final Supplier<MenuType<MenuCiManager>> CI_MANAGER_MENU = MENUS.register("cim_menu", () -> new MenuType<>(MenuCiManager::new, FeatureFlags.DEFAULT_FLAGS));
-    public static final Supplier<MenuType<MenuCiManager>> FILE_CHOOSER_MENU = MENUS.register("cim_file_chooser", () -> new MenuType<>(MenuCiManager::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<MenuCiManager>> CI_MANAGER_MENU = MENUS.register("cim_menu", () -> new MenuType<>(new CmMenuBuilder<>(MenuCiManager::new), FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<MenuCiManager>> FILE_CHOOSER_MENU = MENUS.register("cim_file_chooser", () -> new MenuType<>(new CmMenuBuilder<>(MenuCiManager::new), FeatureFlags.DEFAULT_FLAGS));
+    public static final Supplier<MenuType<MenuCiManager>> IMAGE_INFO_MENU = MENUS.register("cim_image_info", () -> new MenuType<>(new CmMenuBuilder<>(MenuCiManager::new), FeatureFlags.DEFAULT_FLAGS));
     public ChatimageMod(IEventBus modBus, ModContainer container) {
         NeoForge.EVENT_BUS.register(new EventHandler());
         modBus.addListener(this::registerScreens);
@@ -113,5 +118,24 @@ public class ChatimageMod {
 
         event.register(CI_MANAGER_MENU.get(), ScreenCiManager::new);
         event.register(FILE_CHOOSER_MENU.get(), ScreenFileChooser::new);
+        event.register(IMAGE_INFO_MENU.get(), ScreenImageInfo::new);
+    }
+    public static class CmMenuBuilder<T extends AbstractContainerMenu> implements IContainerFactory<T>{
+        public final MenuType.MenuSupplier<T> pConstructor;
+        public CmMenuBuilder(MenuType.MenuSupplier<T> pConstructor){
+            this.pConstructor=pConstructor;
+        }
+        @Override
+        public T create(int windowId, Inventory inv, @Nullable RegistryFriendlyByteBuf data) {
+            T t = pConstructor.create(windowId, inv);
+            if (Objects.nonNull(data)) {
+                if (t instanceof IHasData iHasData) {
+                    iHasData.setData(data.array());
+                } else {
+                    logger.warn("gui [{}] doesn't has data input!But it got data.", t.getClass());
+                }
+            }
+            return t;
+        }
     }
 }

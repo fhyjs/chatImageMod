@@ -8,7 +8,9 @@ import net.minecraft.world.item.ItemStack;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.jetbrains.annotations.Nullable;
 
-public class MenuCiManager extends AbstractContainerMenu {
+public class MenuCiManager extends AbstractContainerMenu implements IHasData{
+    public byte[] data;
+
     public MenuCiManager(int containerId, Inventory playerInv) {
         this(ChatimageMod.CI_MANAGER_MENU.get(), containerId);
         // ...
@@ -26,5 +28,10 @@ public class MenuCiManager extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player pPlayer) {
         return true;
+    }
+
+    @Override
+    public void setData(byte[] data) {
+        this.data=data;
     }
 }
