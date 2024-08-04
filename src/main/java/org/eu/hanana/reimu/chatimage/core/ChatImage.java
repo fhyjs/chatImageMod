@@ -51,7 +51,7 @@ public class ChatImage {
         if (!ChatimageMod.GLOBAL_PROTOCOL) {
             if (url.startsWith("ci:")) {
                 this.url = URL.of(URI.create(url), new ChatimageURLStreamHandlerFactory.ChatimageURLStreamHandler());
-                ChatimageMod.logger.warn("The ci protocol not add to system.May because by an error.Failed to a stable method.");
+                ChatimageMod.logger.warn("The ci protocol was not added to system.May because by an error.Failed to a stable mode.");
             }else {
                 this.url=URI.create(url).toURL();
             }

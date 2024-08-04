@@ -17,5 +17,6 @@
   "msg.ci.status.new": "§e[waiting for thread starting]",
   "msg.ci.status.ok": "",
   "msg.ci.status.error": "§4[error]",
-  "msg.ci.status.wait": "§e[waiting for download texture]"
+  "msg.ci.status.wait": "§e[waiting for download texture]",
+  "gui.ci.download": "Download"
 }

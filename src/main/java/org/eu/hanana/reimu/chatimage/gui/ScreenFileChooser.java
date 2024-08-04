@@ -27,11 +27,19 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
     private EditBox fileName;
     private Screen parent;
     private StringListWidget.StringEntry oldSel;
+    private boolean saveMode;
+    private String defaultName;
     public ScreenFileChooser(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
         cDir=new File(".");
         parent=null;
+        defaultName=null;
+        saveMode=false;
+    }
+
+    public void setSaveMode(boolean saveMode) {
+        this.saveMode = saveMode;
     }
 
     public void setCallback(Callback callback) {
@@ -84,12 +92,18 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
         addRenderableWidget(Button.builder(Component.translatable("gui.ok"),(button)->{
             try {
                 var result = new File(cDir,fileName.getValue());
-                if (result.isDirectory()||!result.exists()){
+                if (result.isDirectory()||(!result.exists()&&!saveMode)){
                     throw new RuntimeException("Not a file/不是文件");
                 }
                 ChatimageMod.logger.info("FileChooser picked {} .",result.getAbsolutePath());
-                if (callback!=null)
+                if (callback!=null) {
                     callback.call(result.getAbsolutePath());
+                    try {
+                        getMinecraft().setScreen(parent);
+                    }catch (Exception e){
+                        getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
+                    }
+                }
             }catch (Exception e){
                 e.printStackTrace();
                 getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
@@ -113,6 +127,13 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
         }catch (Exception e){
             getMinecraft().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
         }
+        if (defaultName!=null){
+            fileName.setValue(defaultName);
+        }
+    }
+
+    public void setDefaultName(String defaultName) {
+        this.defaultName = defaultName;
     }
 
     @Override

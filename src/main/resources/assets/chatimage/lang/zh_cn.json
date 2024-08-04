@@ -17,5 +17,6 @@
   "msg.ci.status.new": "§e[等待线程启动]",
   "msg.ci.status.ok": "",
   "msg.ci.status.error": "§4[错误]",
-  "msg.ci.status.wait": "§e[等待图片下载]"
+  "msg.ci.status.wait": "§e[等待图片下载]",
+  "gui.ci.download": "下载"
 }
