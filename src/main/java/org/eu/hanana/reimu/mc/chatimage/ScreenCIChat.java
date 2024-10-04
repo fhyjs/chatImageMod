@@ -47,8 +47,8 @@ public class ScreenCIChat extends GuiContainer {
         buttonList.add(new GuiButton(1,guiLeft+xSize-32,guiTop+ySize-30,20,20, lang_cn?"发送":"Send"));
         buttonList.add(new GuiButton(2,guiLeft+95,guiTop+100,20,20, lang_cn?"添加":"Add"));
         textFieldCIURL = new GuiTextField(0, this.fontRenderer, guiLeft+12, guiTop+80, 100, 15);
-        textFieldCIH = new GuiTextField(1, this.fontRenderer, guiLeft+12, guiTop+100, 20, 15);
-        textFieldCIW = new GuiTextField(2, this.fontRenderer, guiLeft+60, guiTop+100, 20, 15);
+        textFieldCIW = new GuiTextField(1, this.fontRenderer, guiLeft+12, guiTop+100, 20, 15);
+        textFieldCIH = new GuiTextField(2, this.fontRenderer, guiLeft+60, guiTop+100, 20, 15);
         textFieldCIINFO = new GuiTextField(3, this.fontRenderer, guiLeft+12, guiTop+130, 100, 15);
         textFieldPV = new GuiTextField(4, this.fontRenderer, guiLeft+12, guiTop+20, 100, 15);
         textFieldPV.setMaxStringLength(Integer.MAX_VALUE);
