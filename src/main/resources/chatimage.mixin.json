@@ -4,9 +4,13 @@
   "mixins": [
     "MixinFriendlyByteBuf",
     "MixinScreen",
+    "MixinServerGamePacketListenerImpl",
     "MixinStringRepresentable"
   ],
-  "client": ["MixinGuiGraphics"],
+  "client": [
+    "MixinBookEditScreen",
+    "MixinGuiGraphics"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

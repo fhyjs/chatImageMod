@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.SimpleMenuProvider;
 import net.neoforged.api.distmarker.Dist;
@@ -54,42 +55,7 @@ public class EventHandler {
     }
     @SubscribeEvent
     public void onServerChat(ServerChatEvent event){
-        Component message = event.getMessage();
-        String[] ciCodes = ChatImage.ChatImageData.getCiCodes(message.getString());
-        if (ciCodes!=null) {
-            String input = message.getString();
-            for (String ciCode : ciCodes) {
-                input = input.replaceFirst(escapeSpecialRegexChars(ciCode),"*#*#");
-            }
-            List<String> strings = splitWithDelimiter(input,"\\*#\\*#");
-            int cp=0;
-            MutableComponent result = Component.empty();
-            for (int i = 0; i < strings.size(); i++) {
-                String s = strings.get(i);
-                if (s.equals("*#*#")){
-                    try {
-                        ChatImage.getChatImage(ciCodes[cp]);
-                    } catch (Throwable e) {
-                        result.append(Component.translatable("msg.ci.photo").setStyle(
-                                Style.EMPTY
-                                        .withColor(ChatFormatting.RED)
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Component.literal(e.toString())))
-                        ));
-                        continue;
-                    }
-                    result.append(Component.translatable("msg.ci.photo").setStyle(
-                            Style.EMPTY
-                                    .withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent(Actions.SHOW_IMAGE,Component.literal(ciCodes[cp])))
-                                    .withClickEvent(new ClickEvent(Actions.VIEW_IMAGE,ciCodes[cp]))
-                    ));
-                    cp++;
-                }else {
-                    result.append(s);
-                }
-            }
-            event.setMessage(result);
-        }
+        Util.genCIMsg(event);
     }
     public static List<String> splitWithDelimiter(String input, String delimiter) {
         List<String> result = new ArrayList<>();
@@ -104,7 +70,7 @@ public class EventHandler {
         return result;
     }
     // 转义正则表达式特殊字符的方法
-    private static String escapeSpecialRegexChars(String s) {
+    public static String escapeSpecialRegexChars(String s) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);

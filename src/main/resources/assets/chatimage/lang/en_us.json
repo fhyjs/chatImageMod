@@ -18,5 +18,6 @@
   "msg.ci.status.ok": "",
   "msg.ci.status.error": "§4[error]",
   "msg.ci.status.wait": "§e[waiting for download texture]",
-  "gui.ci.download": "Download"
+  "gui.ci.download": "Download",
+  "gui.ci.parse_helper": "chat image helper"
 }

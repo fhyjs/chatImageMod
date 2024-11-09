@@ -18,5 +18,6 @@
   "msg.ci.status.ok": "",
   "msg.ci.status.error": "§4[错误]",
   "msg.ci.status.wait": "§e[等待图片下载]",
-  "gui.ci.download": "下载"
+  "gui.ci.download": "下载",
+  "gui.ci.parse_helper": "图片码助手"
 }

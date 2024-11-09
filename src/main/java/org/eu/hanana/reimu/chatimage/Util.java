@@ -1,24 +1,34 @@
 package org.eu.hanana.reimu.chatimage;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.*;
+import net.minecraft.server.network.Filterable;
+import net.minecraft.server.network.FilteredText;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.WrittenBookContent;
+import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.eu.hanana.reimu.chatimage.core.Actions;
+import org.eu.hanana.reimu.chatimage.core.ChatImage;
 import org.eu.hanana.reimu.chatimage.networking.HandlerDownloadCl;
 import org.eu.hanana.reimu.chatimage.networking.HandlerUploadCl;
 import org.eu.hanana.reimu.chatimage.networking.PayloadDownload;
 import org.eu.hanana.reimu.chatimage.networking.PayloadUpload;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.Optional;
+
+import static org.eu.hanana.reimu.chatimage.EventHandler.escapeSpecialRegexChars;
+import static org.eu.hanana.reimu.chatimage.EventHandler.splitWithDelimiter;
 
 public class Util {
     public static String reply;
@@ -158,5 +168,59 @@ public class Util {
             bos.close();
         }
     }
-
+    public static void signBook(ServerGamePacketListenerImpl serverGamePacketListener, FilteredText title, List<FilteredText> pages, int index, CallbackInfo ci, ItemStack itemstack1) {
+        var raw_data=itemstack1.get(DataComponents.WRITTEN_BOOK_CONTENT);
+        if (raw_data == null) {
+            return;
+        }
+        var data = new ArrayList<>(raw_data.pages());
+        var data1 = new ArrayList<Filterable<Component>>();
+        for (Filterable<Component> datum : data) {
+            var vEvent = new ServerChatEvent(serverGamePacketListener.player,datum.get(true).getString(),datum.get(true));
+            genCIMsg(vEvent);
+            data1.add(new Filterable<>(vEvent.getMessage(), Optional.empty()));
+        }
+        itemstack1.set(
+                DataComponents.WRITTEN_BOOK_CONTENT,
+                new WrittenBookContent(raw_data.title(), raw_data.author(), raw_data.generation(), data1, raw_data.resolved())
+        );
+    }
+    public static void genCIMsg(ServerChatEvent event){
+        Component message = event.getMessage();
+        String[] ciCodes = ChatImage.ChatImageData.getCiCodes(message.getString());
+        if (ciCodes!=null) {
+            String input = message.getString();
+            for (String ciCode : ciCodes) {
+                input = input.replaceFirst(escapeSpecialRegexChars(ciCode),"*#*#");
+            }
+            List<String> strings = splitWithDelimiter(input,"\\*#\\*#");
+            int cp=0;
+            MutableComponent result = Component.empty();
+            for (int i = 0; i < strings.size(); i++) {
+                String s = strings.get(i);
+                if (s.equals("*#*#")){
+                    try {
+                        ChatImage.getChatImage(ciCodes[cp]);
+                    } catch (Throwable e) {
+                        result.append(Component.translatable("msg.ci.photo").setStyle(
+                                Style.EMPTY
+                                        .withColor(ChatFormatting.RED)
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Component.literal(e.toString())))
+                        ));
+                        continue;
+                    }
+                    result.append(Component.translatable("msg.ci.photo").setStyle(
+                            Style.EMPTY
+                                    .withColor(ChatFormatting.GREEN)
+                                    .withHoverEvent(new HoverEvent(Actions.SHOW_IMAGE,Component.literal(ciCodes[cp])))
+                                    .withClickEvent(new ClickEvent(Actions.VIEW_IMAGE,ciCodes[cp]))
+                    ));
+                    cp++;
+                }else {
+                    result.append(s);
+                }
+            }
+            event.setMessage(result);
+        }
+    }
 }

@@ -1,11 +1,13 @@
 package org.eu.hanana.reimu.chatimage.gui;
 
+import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
@@ -19,18 +21,24 @@ import org.eu.hanana.reimu.chatimage.Util;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
-public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
+public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> implements IHasData{
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/demo_background.png");
     public EditBox textToSend;
     public EditBox url;
     public EditBox w;
     public EditBox h;
     public EditBox info;
+    public Screen oldScreen;
+    public Method sendMethod;
+    public String oldScreenName;
     public ScreenCiManager(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
+        this.oldScreen=Minecraft.getInstance().screen;
     }
 
     @Override
@@ -40,9 +48,11 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
             ScreenCiManager.this.onClose();
         }).bounds(getGuiLeft()+getXSize()-30,getGuiTop()+7,15,15).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.send"),(button)->{
-            this.getMinecraft().gui.getChat().addRecentChat(textToSend.getValue());
-            Objects.requireNonNull(this.getMinecraft().player).connection.sendChat(textToSend.getValue());
-            ScreenCiManager.this.onClose();
+            try {
+                sendMethod.invoke(oldScreen,textToSend.getValue());
+            } catch (IllegalAccessException | InvocationTargetException | NullPointerException e) {
+                this.defaultSend(textToSend.getValue());
+            }
         }).bounds(getGuiLeft()+getXSize()-90,getGuiTop()+getYSize()-30,40,20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.clear"),(button)->{
             try {
@@ -103,7 +113,12 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
         url.setMaxLength(114514);
         textToSend.setMaxLength(114514);
     }
-
+    @SuppressWarnings("unused")
+    public void defaultSend(String s){
+        this.getMinecraft().gui.getChat().addRecentChat(s);
+        Objects.requireNonNull(this.getMinecraft().player).connection.sendChat(s);
+        ScreenCiManager.this.onClose();
+    }
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (Minecraft.getInstance().options.keyInventory.matches(pKeyCode,pScanCode))
@@ -130,5 +145,36 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> {
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+    }
+    public void setSendMethod(){
+
+    }
+    @Override
+    public void setData(byte[] data) {
+        ExtraData extraData = new Gson().fromJson(new String(data),ExtraData.class);
+        if (extraData.action().equals("send_method")) {
+            for (Method method : oldScreen.getClass().getMethods()) {
+                if (method.getName().equals(extraData.value())){
+                    this.sendMethod=method;
+                    this.oldScreenName=extraData.extra();
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        if (oldScreen!=null){
+            if (oldScreen.getClass().getName().equals(oldScreenName)){
+                getMinecraft().setScreen(oldScreen);
+            }
+        }
+    }
+
+    @Override
+    public byte[] getData() {
+        return new byte[0];
     }
 }

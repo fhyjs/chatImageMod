@@ -53,10 +53,19 @@ public class MenuCiManager extends AbstractContainerMenu implements IHasData{
                         Class<?> screenClass = Class.forName(extraData.value());
                         Constructor<?> declaredConstructor = screenClass.getDeclaredConstructor(this.getClass(), player.getInventory().getClass(), Component.class);
                         newScreen = declaredConstructor.newInstance(this, player.getInventory(), Component.literal("New Screen"));
+                        if (newScreen instanceof IHasData){
+                            ((IHasData) newScreen).setData(data);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     Minecraft.getInstance().setScreen((Screen) newScreen);
+                }
+            }else if (extraData.action().equals("send_data")) {
+                if (player.level().isClientSide()) {
+                    if (Minecraft.getInstance().screen instanceof IHasData iHasData) {
+                        iHasData.setData(extraData.value().getBytes());
+                    }
                 }
             }
         }
