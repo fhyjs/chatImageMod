@@ -19,5 +19,7 @@
   "msg.ci.status.error": "§4[error]",
   "msg.ci.status.wait": "§e[waiting for download texture]",
   "gui.ci.download": "Download",
+  "cfg.ci.remove_all": "Remove all uploaded images when server restart.",
+  "gui.ci.will_clear": "The server will clear your uploaded images. Please use online image.",
   "gui.ci.parse_helper": "chat image helper"
 }

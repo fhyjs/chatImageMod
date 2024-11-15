@@ -9,9 +9,13 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -20,6 +24,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatimageURLStreamHandlerFactory;
 import org.eu.hanana.reimu.chatimage.gui.*;
 import org.eu.hanana.reimu.chatimage.networking.*;
@@ -58,6 +63,9 @@ public class ChatimageMod {
         modBus.addListener(this::registerPayloads);
         MENUS.register(modBus);
         modBus.addListener(this::init);
+        container.getEventBus().register(ChatImageConfig.class);
+        container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.SPEC);
+        container.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(container, parent));
     }
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
@@ -93,12 +101,22 @@ public class ChatimageMod {
                         HandlerGetScreenExtra::handleData
                 )
         );
+        registrar.playBidirectional(
+                PayloadGetModConfig.TYPE,
+                PayloadGetModConfig.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        HandlerGetModConfigure::handleData,
+                        HandlerGetModConfigure::handleData
+                )
+        );
     }
     private void init(FMLCommonSetupEvent event){
-        try {
-            Util.deleteDirectory(new File(".","chatimage"));
-        }catch (Exception e){
-            logger.error(e);
+        if (ChatImageConfig.remove_all) {
+            try {
+                Util.deleteDirectory(new File(".", "chatimage"));
+            } catch (Exception e) {
+                logger.error(e);
+            }
         }
         GLOBAL_PROTOCOL=true;
         try {
