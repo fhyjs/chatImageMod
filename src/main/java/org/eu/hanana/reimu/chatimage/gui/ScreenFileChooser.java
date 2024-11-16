@@ -109,7 +109,7 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
                 e.printStackTrace();
                 getMinecraft().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"), Component.literal(e.toString())));
             }
-        }).bounds(getGuiLeft()+getXSize()-50,getGuiTop()+getYSize()-25,30,20).build());
+        }).bounds(getGuiLeft()+getXSize()-55,getGuiTop()+getYSize()-25,30,20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.cancel"),(button)->{
             try {
                 getMinecraft().setScreen(parent);
@@ -131,6 +131,8 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
         if (defaultName!=null){
             fileName.setValue(defaultName);
         }
+        addRenderableWidget(Button.builder(Component.literal("^"), button -> stringListWidget.setClampedScrollAmount(stringListWidget.getScrollAmount()+getFont().lineHeight * -1.2)).bounds(getGuiLeft()+getXSize()-22,getGuiTop()+34,10,10).build());
+        addRenderableWidget(Button.builder(Component.literal("V"), button -> stringListWidget.setClampedScrollAmount(stringListWidget.getScrollAmount()+getFont().lineHeight *  1.2)).bounds(getGuiLeft()+getXSize()-22,getGuiTop()+getYSize()-28,10,10).build());
     }
 
     public void setDefaultName(String defaultName) {
@@ -147,10 +149,18 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
             File file = ((FileString) selected.getObj()).file();
             if (file.isDirectory()) {
                 stringListWidget.setSelected(null);
-                cDir = file;
-                init();
             }else {
                 fileName.setValue(file.getName());
+            }
+        }else {
+            if (selected != null) {
+                var file = ((FileString) selected.getObj()).file();
+                if (file.isDirectory()) {
+                    stringListWidget.setSelected(null);
+                    oldSel=null;
+                    cDir = file;
+                    init();
+                }
             }
         }
     }
@@ -159,6 +169,16 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
         if (Minecraft.getInstance().options.keyInventory.matches(pKeyCode,pScanCode))
             return false;
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
+    public boolean mouseScrolled(double p_364830_, double p_360707_, double p_364436_, double p_364417_) {
+        return super.mouseScrolled(p_364830_, p_360707_, p_364436_, p_364417_)||stringListWidget.mouseScrolled(p_364830_, p_360707_, p_364436_, p_364417_);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY)||stringListWidget.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
