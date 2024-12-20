@@ -21,5 +21,8 @@
   "gui.ci.download": "Download",
   "cfg.ci.remove_all": "Remove all uploaded images when server restart.",
   "gui.ci.will_clear": "The server will clear your uploaded images. Please use online image.",
+  "cfg.ci.maxsize": "The max file size of upload image (byte).",
+  "gui.ci.maxsize": "Max image file size %s.",
+  "gui.ci.copycode": "Shift : Copy code.",
   "gui.ci.parse_helper": "chat image helper"
 }

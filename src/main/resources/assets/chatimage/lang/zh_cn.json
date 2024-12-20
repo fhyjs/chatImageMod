@@ -21,5 +21,7 @@
   "gui.ci.download": "下载",
   "gui.ci.parse_helper": "图片码助手",
   "cfg.ci.remove_all": "服务器重启时移除所有上传的图片.",
-  "gui.ci.will_clear": "服务器被配置为在重启时清除所有上传的图片. 建议使用在线图片."
+  "gui.ci.will_clear": "服务器被配置为在重启时清除所有上传的图片. 建议使用在线图片.",
+  "cfg.ci.maxsize": "最大上传图片大小 (单位:byte).",
+  "gui.ci.maxsize": "最大文件大小 %s."
 }

@@ -3,6 +3,7 @@ package org.eu.hanana.reimu.chatimage.gui;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -15,21 +16,31 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TimeSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.fml.i18n.I18nManager;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
-import org.eu.hanana.reimu.chatimage.Util;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 import org.eu.hanana.reimu.chatimage.core.ImageStatus;
 import org.lwjgl.opengl.GL11;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Timer;
 
 public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/demo_background.png");
@@ -85,12 +96,41 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
                 getMinecraft().setScreen(screenFileChooser);
             }
         }).bounds(getGuiLeft()+getXSize()-200,getGuiTop()+23,35,15).build());
+        addRenderableWidget(Button.builder(Component.translatable("chat.copy"), new Button.OnPress() {
+            @Override
+            public void onPress(Button button) {
+                getMinecraft().keyboardHandler.setClipboard(extraData.extra());
+            }
+        }).bounds(getGuiLeft()+getXSize()-163,getGuiTop()+23,40,15).build());
         reset();
     }
     private void reset(){
-        scale=1 ;
+        scale=0 ;
+        var step = 0.9f;
+        var count = 0;
+        long nanos = Util.getNanos();
+        while (true){
+            count++;
+            var cw = image.w*scale;
+            var ch = image.h*scale;
+            var xw = getXSize()-30;
+            var xh = getYSize()-60;
+            var peek = scale+step;
+            if ((cw<xw&&image.w*peek>=xw)||(ch<xh&&image.h*peek>=xh)){
+                if (cw/xw<0.9&&ch/xh<0.9){
+                    step*=0.9f;
+                    scale=0;
+                    continue;
+                }
+                break;
+            }
+            if (scale>=10||step<=0)
+                break;
+            scale+=step;
+        }
         img_x = 10 + (getXSize() - 30) / 2f - image.w * scale / 2;
         img_y = 50 + (getYSize() - 60) / 2f - image.h * scale / 2;
+        ChatimageMod.logger.debug("Auto scale image with {} cycles in {} ms.",count,(Util.getNanos()-nanos) / 1000000f);
     }
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
@@ -143,11 +183,38 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
             color=0xff2a00;
         graphics.drawString(this.font, String.format("[%s]",image.status),15,55,color);
         graphics.drawString(this.font, String.format("URL:%s",image.url),17,38,0);
-        graphics.drawString(this.font, String.format("%.3fx",scale),getXSize()-122,28,0);
+        graphics.drawString(this.font, String.format("%.3fx",scale),getXSize()-122,28,0xFF9616c4);
+        graphics.drawString(this.font, String.format("%dx%d",image.w,image.h),4,18,0xFF448000);
 
     }
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+    }
+    // 自定义 Transferable 实现
+    private static class TransferableImage implements Transferable {
+        private final Image image;
+
+        public TransferableImage(Image image) {
+            this.image = image;
+        }
+
+        @Override
+        public DataFlavor[] getTransferDataFlavors() {
+            return new DataFlavor[]{DataFlavor.imageFlavor};
+        }
+
+        @Override
+        public boolean isDataFlavorSupported(DataFlavor flavor) {
+            return DataFlavor.imageFlavor.equals(flavor);
+        }
+
+        @Override
+        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+            if (!isDataFlavorSupported(flavor)) {
+                throw new UnsupportedFlavorException(flavor);
+            }
+            return image;
+        }
     }
 }

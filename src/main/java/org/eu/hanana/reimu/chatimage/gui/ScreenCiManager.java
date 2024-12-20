@@ -16,9 +16,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.fml.i18n.I18nManager;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.Util;
+import org.eu.hanana.reimu.chatimage.client.ServConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
+import org.eu.hanana.reimu.chatimage.networking.PayloadGetModConfig;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +47,7 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
     @Override
     protected void init() {
         super.init();
+        PacketDistributor.sendToServer(new PayloadGetModConfig("maxFileSize","java.lang.Integer",""));
         addRenderableWidget(Button.builder(Component.literal("X"),(button)->{
             ScreenCiManager.this.onClose();
         }).bounds(getGuiLeft()+getXSize()-30,getGuiTop()+7,15,15).build());
@@ -66,6 +70,7 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.upload"),(button)->{
             ScreenFileChooser fileChooser = new ScreenFileChooser(menu, getMinecraft().player.getInventory(), Component.literal("FileChooser"));
             fileChooser.setParent(this);
+            fileChooser.setMaxFileSize(ServConfig.maxFileSize);
             getMinecraft().setScreen(fileChooser);
             fileChooser.setCallback((path)->{
                 getMinecraft().setScreen(ScreenCiManager.this);

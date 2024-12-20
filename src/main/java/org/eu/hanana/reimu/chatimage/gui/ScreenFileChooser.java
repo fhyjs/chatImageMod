@@ -14,9 +14,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
+import org.eu.hanana.reimu.chatimage.client.ServConfig;
+import org.eu.hanana.reimu.chatimage.networking.PayloadGetModConfig;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Objects;
 
 public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
@@ -30,6 +34,7 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
     private StringListWidget.StringEntry oldSel;
     private boolean saveMode;
     private String defaultName;
+    private int maxFileSize=-1;
     public ScreenFileChooser(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
@@ -53,6 +58,14 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
 
     public void setParent(Screen parent) {
         this.parent = parent;
+    }
+
+    public void setMaxFileSize(int maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
+    public int getMaxFileSize() {
+        return maxFileSize;
     }
 
     @Override
@@ -95,6 +108,9 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
                 var result = new File(cDir,fileName.getValue());
                 if (result.isDirectory()||(!result.exists()&&!saveMode)){
                     throw new RuntimeException("Not a file/不是文件");
+                }
+                if (Files.size(result.toPath())>ServConfig.maxFileSize){
+                    throw new RuntimeException(String.format("File too big/文件太大(%d>%d bytes)",Files.size(result.toPath()),ServConfig.maxFileSize));
                 }
                 ChatimageMod.logger.info("FileChooser picked {} .",result.getAbsolutePath());
                 if (callback!=null) {
@@ -200,7 +216,9 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
     }
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-
+        if (getMaxFileSize()!=-1) {
+            graphics.drawString(font, Component.translatable("gui.ci.maxsize", getMaxFileSize() / 1024 / 1024 + "MB"), 10, 10, 0xFF98ad10);
+        }
     }
     @Override
     protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {

@@ -19,14 +19,19 @@ public class ChatImageConfig {
             .translation("cfg.ci.remove_all")
             .define("remove_uploads", true);
 
-
+    private static final ModConfigSpec.IntValue MAX_FILE_SIZE = BUILDER
+            .comment("The max file size of upload image (byte).")
+            .translation("cfg.ci.maxsize")
+            .defineInRange("maxsize", 3145728,0,20971520);
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static Boolean remove_all;
+    public static Integer maxFileSize;
 
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent event)
     {
         remove_all=REMOVE_UPLOADS.get();
+        maxFileSize=MAX_FILE_SIZE.get();
     }
 }
