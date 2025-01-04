@@ -2,6 +2,7 @@ package org.eu.hanana.reimu.chatimage.gui;
 
 import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
+
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +61,9 @@ public class MenuCiManager extends AbstractContainerMenu implements IHasData{
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    Minecraft.getInstance().setScreen((Screen) newScreen);
+                    if (FMLEnvironment.dist.isClient()) {
+                        Minecraft.getInstance().setScreen((Screen) newScreen);
+                    }
                 }
             }else if (extraData.action().equals("send_data")) {
                 if (player.level().isClientSide()) {

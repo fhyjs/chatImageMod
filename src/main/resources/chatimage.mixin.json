@@ -3,11 +3,11 @@
   "package": "org.eu.hanana.reimu.chatimage.mixins",
   "mixins": [
     "MixinFriendlyByteBuf",
-    "MixinScreen",
     "MixinServerGamePacketListenerImpl",
     "MixinStringRepresentable"
   ],
   "client": [
+    "MixinScreen",
     "MixinBookEditScreen",
     "MixinGuiGraphics"
   ],

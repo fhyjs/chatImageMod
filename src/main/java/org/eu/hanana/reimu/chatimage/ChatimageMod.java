@@ -7,14 +7,15 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModLoader;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -65,13 +66,16 @@ public class ChatimageMod {
     public static final Supplier<MenuType<MenuCiManager>> IMAGE_INFO_MENU = MENUS.register("cim_image_info", () -> new MenuType<>(new CmMenuBuilder<>(MenuCiManager::new), FeatureFlags.DEFAULT_FLAGS));
     public ChatimageMod(IEventBus modBus, ModContainer container) {
         NeoForge.EVENT_BUS.register(new EventHandler());
-        modBus.addListener(this::registerScreens);
-        modBus.addListener(this::registerPayloads);
         MENUS.register(modBus);
         modBus.addListener(this::init);
         container.getEventBus().register(ChatImageConfig.class);
         container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.SPEC);
-        container.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(container, parent));
+
+        if (FMLEnvironment.dist.isClient()) {
+            clientSideInit(container);
+            modBus.addListener(this::registerScreens);
+        }
+        modBus.addListener(this::registerPayloads);
         if (ModList.get().isLoaded("legacy_command_registry")){
             EVENT.register(new LegacyCommandRegistrationEvent() {
                 @Override
@@ -124,6 +128,10 @@ public class ChatimageMod {
                 )
         );
     }
+    @OnlyIn(Dist.CLIENT)
+    private void clientSideInit(ModContainer container){
+        container.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(container, parent));
+    }
     private void init(FMLCommonSetupEvent event){
         if (ChatImageConfig.remove_all) {
             try {
@@ -154,6 +162,7 @@ public class ChatimageMod {
             }
         }
     }
+    @OnlyIn(Dist.CLIENT)
     private void registerScreens(RegisterMenuScreensEvent event) {
 
         event.register(CI_MANAGER_MENU.get(), ScreenCiManager::new);
