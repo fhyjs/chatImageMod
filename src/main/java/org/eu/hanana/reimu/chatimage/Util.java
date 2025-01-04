@@ -1,6 +1,7 @@
 package org.eu.hanana.reimu.chatimage;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.item.BundleSelectedItemSpecialRenderer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.network.Filterable;

@@ -109,7 +109,7 @@ public class ScreenFileChooser extends AbstractContainerScreen<MenuCiManager> {
                 if (result.isDirectory()||(!result.exists()&&!saveMode)){
                     throw new RuntimeException("Not a file/不是文件");
                 }
-                if (Files.size(result.toPath())>ServConfig.maxFileSize){
+                if (!saveMode&&Files.size(result.toPath())>ServConfig.maxFileSize){
                     throw new RuntimeException(String.format("File too big/文件太大(%d>%d bytes)",Files.size(result.toPath()),ServConfig.maxFileSize));
                 }
                 ChatimageMod.logger.info("FileChooser picked {} .",result.getAbsolutePath());

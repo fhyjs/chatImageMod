@@ -9,6 +9,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -24,10 +26,13 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eu.hanana.reimu.chatimage.command.ChatImageCommand;
 import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatimageURLStreamHandlerFactory;
 import org.eu.hanana.reimu.chatimage.gui.*;
 import org.eu.hanana.reimu.chatimage.networking.*;
+import org.eu.hanana.reimu.mc.lcr.CommandManager;
+import org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
 
@@ -40,6 +45,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.eu.hanana.reimu.chatimage.ChatimageMod.MOD_ID;
+import static org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent.EVENT;
 
 @Mod(MOD_ID)
 public class ChatimageMod {
@@ -66,6 +72,14 @@ public class ChatimageMod {
         container.getEventBus().register(ChatImageConfig.class);
         container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.SPEC);
         container.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(container, parent));
+        if (ModList.get().isLoaded("legacy_command_registry")){
+            EVENT.register(new LegacyCommandRegistrationEvent() {
+                @Override
+                public void register(CommandManager commandManager) {
+                    commandManager.register(new ChatImageCommand());
+                }
+            });
+        }
     }
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");

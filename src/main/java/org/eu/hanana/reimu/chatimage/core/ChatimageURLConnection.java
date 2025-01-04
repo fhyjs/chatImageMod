@@ -20,6 +20,8 @@ public class ChatimageURLConnection extends URLConnection {
             String[] split = getURL().getPath().split("/");
             if (split[0].equals("lo")) {
                 data = Util.download(split[1]);
+            }else if (split[0].equals("cp")) {
+                data = this.getClass().getClassLoader().getResourceAsStream(getURL().getPath().substring(3)).readAllBytes();
             }
         } catch (InterruptedException e) {
             throw new IOException(e);

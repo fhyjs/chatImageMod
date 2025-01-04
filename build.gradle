@@ -21,8 +21,18 @@ repositories {
         url 'https://maven.aliyun.com/repository/public/'
     }
     maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+    maven { url "https://maven.architectury.dev/" }
+    maven { url "https://maven.fabricmc.net/" }
     maven { url 'https://repo1.maven.org/maven2/' }  // Maven中央仓库
     maven { url 'https://jitpack.io' }                // JitPack仓库
+    maven {
+        credentials {
+            username = "fhyjs"
+            password = "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" //Read package only!
+        }
+
+        url 'https://maven.pkg.github.com/fhyjs/legacy_command_registry/'
+    }
     mavenLocal()
     mavenCentral()
 }
@@ -99,6 +109,9 @@ dependencies {
     // And its provides the option to then use net.minecraft as the group, and one of; client, server or joined as the module name, plus the game version as version.
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
     implementation "net.neoforged:neoforge:${neo_version}"
+    api "org.eu.hanana.reimu.mc.lcr:neoforge:1.1.0"
+    api "dev.architectury:architectury:15.0.1"
+    api "dev.architectury:architectury-neoforge:15.0.1"
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
