@@ -20,9 +20,12 @@ import net.minecraft.util.TimeSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.fml.i18n.I18nManager;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
+import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 import org.eu.hanana.reimu.chatimage.core.ImageStatus;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.system.JNI;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -38,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Timer;
@@ -100,7 +104,28 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
         addRenderableWidget(Button.builder(Component.translatable("chat.copy"), new Button.OnPress() {
             @Override
             public void onPress(Button button) {
-                getMinecraft().keyboardHandler.setClipboard(extraData.extra());
+                if(ChatImageConfig.copy_base64){
+                    ResourceLocation texture = image.getTexture();
+                    if (texture==null){
+                        return;
+                    }
+                    try{
+                        DynamicTexture texture1 = (DynamicTexture) getMinecraft().getTextureManager().getTexture(texture);
+                        BufferedImage bufferedImage = org.eu.hanana.reimu.chatimage.Util.convertToBufferedImage(texture1.getPixels());
+                        // 将 BufferedImage 转换为字节数据
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ImageIO.write(bufferedImage, "PNG", baos);
+                        byte[] imageData = baos.toByteArray();
+
+                        // 使用 GLFW 设置剪贴板
+                        getMinecraft().keyboardHandler.setClipboard("image/png;base64," + Base64.getEncoder().encodeToString(imageData));
+                    }catch (Exception e){
+                        ChatimageMod.logger.error(e);
+                    }
+
+                }else {
+                    getMinecraft().keyboardHandler.setClipboard(extraData.extra());
+                }
             }
         }).bounds(getGuiLeft()+getXSize()-163,getGuiTop()+23,40,15).build());
         reset();
@@ -213,28 +238,30 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
     }
     // 自定义 Transferable 实现
     private static class TransferableImage implements Transferable {
-        private final Image image;
+        private final BufferedImage image;
 
-        public TransferableImage(Image image) {
+        public TransferableImage(BufferedImage image) {
             this.image = image;
         }
 
         @Override
         public DataFlavor[] getTransferDataFlavors() {
+            // 声明支持的数据格式（图像格式）
             return new DataFlavor[]{DataFlavor.imageFlavor};
         }
 
         @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
-            return DataFlavor.imageFlavor.equals(flavor);
+            return flavor.equals(DataFlavor.imageFlavor);
         }
 
         @Override
-        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-            if (!isDataFlavorSupported(flavor)) {
+        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+            if (isDataFlavorSupported(flavor)) {
+                return image;
+            } else {
                 throw new UnsupportedFlavorException(flavor);
             }
-            return image;
         }
     }
 }

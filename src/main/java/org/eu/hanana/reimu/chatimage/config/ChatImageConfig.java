@@ -18,7 +18,10 @@ public class ChatImageConfig {
             .comment("Delete all uploaded image when server restart.")
             .translation("cfg.ci.remove_all")
             .define("remove_uploads", true);
-
+    private static final ModConfigSpec.BooleanValue COPY_BASE64 = BUILDER
+            .comment("Copy base64 data instead of ci code.")
+            .translation("cfg.ci.copy_base64")
+            .define("copy_base64", false);
     private static final ModConfigSpec.IntValue MAX_FILE_SIZE = BUILDER
             .comment("The max file size of upload image (byte).")
             .translation("cfg.ci.maxsize")
@@ -26,12 +29,14 @@ public class ChatImageConfig {
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static Boolean remove_all;
+    public static Boolean copy_base64;
     public static Integer maxFileSize;
 
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent event)
     {
         remove_all=REMOVE_UPLOADS.get();
+        copy_base64=COPY_BASE64.get();
         maxFileSize=MAX_FILE_SIZE.get();
     }
 }

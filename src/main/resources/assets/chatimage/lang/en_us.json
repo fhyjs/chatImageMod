@@ -7,6 +7,7 @@
   "gui.ci.info": "information",
   "pack.ci.dec": "ci mod pack",
   "msg.ci.photo": "[photo]",
+  "cfg.ci.copy_base64": "Copy base64 instead of ci code",
   "msg.ci.OK": "",
   "msg.ci.ERROR": "§4ERROR",
   "msg.ci.WAIT": "§3LOADING",

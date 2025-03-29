@@ -1,5 +1,6 @@
 package org.eu.hanana.reimu.chatimage;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.item.BundleSelectedItemSpecialRenderer;
 import net.minecraft.core.component.DataComponents;
@@ -7,6 +8,7 @@ import net.minecraft.network.chat.*;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.neoforged.neoforge.event.ServerChatEvent;
@@ -17,12 +19,15 @@ import org.eu.hanana.reimu.chatimage.networking.HandlerDownloadCl;
 import org.eu.hanana.reimu.chatimage.networking.HandlerUploadCl;
 import org.eu.hanana.reimu.chatimage.networking.PayloadDownload;
 import org.eu.hanana.reimu.chatimage.networking.PayloadUpload;
+import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -185,6 +190,34 @@ public class Util {
                 DataComponents.WRITTEN_BOOK_CONTENT,
                 new WrittenBookContent(raw_data.title(), raw_data.author(), raw_data.generation(), data1, raw_data.resolved())
         );
+    }
+    public static BufferedImage convertToBufferedImage(NativeImage nativeImage) {
+        // 1. 验证格式必须是 RGBA
+        if (nativeImage.format() != NativeImage.Format.RGBA) {
+            throw new IllegalArgumentException("只支持 RGBA 格式的 NativeImage");
+        }
+
+        // 2. 获取图像尺寸
+        int width = nativeImage.getWidth();
+        int height = nativeImage.getHeight();
+
+        // 3. 创建目标 BufferedImage
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        // 4. 批量获取像素数据（避免逐像素操作）
+        IntBuffer pixelBuffer = MemoryUtil.memIntBuffer(nativeImage.getPointer(), width * height);
+        int[] pixels = new int[width * height];
+        pixelBuffer.get(pixels);
+
+        // 5. 转换 ABGR 到 ARGB（利用游戏工具类）
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = ARGB.fromABGR(pixels[i]);
+        }
+
+        // 6. 一次性设置到 BufferedImage
+        bufferedImage.setRGB(0, 0, width, height, pixels, 0, width);
+
+        return bufferedImage;
     }
     public static void genCIMsg(ServerChatEvent event){
         Component message = event.getMessage();
