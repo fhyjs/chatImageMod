@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 import org.joml.Vector2ic;
 
@@ -54,9 +55,10 @@ public class RenderCi {
 
                 j += clienttooltipcomponent.getHeight(pFont);
             }
-
-            int i2 = Math.max(i, chatImage.w);
-            int j2 = j+chatImage.h;
+            int imgW = Math.min(chatImage.w, ChatImageConfig.maxPvWidth);
+            int imgH = Math.min(chatImage.h, ChatImageConfig.maxPvHeight);
+            int i2 = Math.max(i, imgW);
+            int j2 = j+imgH;
             Vector2ic vector2ic = DefaultTooltipPositioner.INSTANCE.positionTooltip(guiGraphics.guiWidth(), guiGraphics.guiHeight(), pMouseX, pMouseY, i2, j2);
             int l = vector2ic.x();
             int i1 = vector2ic.y();
@@ -68,7 +70,7 @@ public class RenderCi {
 
             guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
             if (texture!=null) {
-                guiGraphics.blit(RenderType::guiTextured,texture, l, i1+j, 0, 0, chatImage.w,chatImage.h,chatImage.w,chatImage.h);
+                guiGraphics.blit(RenderType::guiTextured,texture, l, i1+j, 0, 0, imgW,imgH,imgW,imgH);
             }
             //guiGraphics.fill(l,i1,i2+l,j2+i1,0xFFFFFFFF);
             int k1 = i1;

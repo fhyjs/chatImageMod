@@ -4,39 +4,83 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForgeConfig;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ChatImageConfig {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-
-    private static final ModConfigSpec.BooleanValue REMOVE_UPLOADS = BUILDER
-            .comment("Delete all uploaded image when server restart.")
-            .translation("cfg.ci.remove_all")
-            .define("remove_uploads", true);
-    private static final ModConfigSpec.BooleanValue COPY_BASE64 = BUILDER
-            .comment("Copy base64 data instead of ci code.")
-            .translation("cfg.ci.copy_base64")
-            .define("copy_base64", false);
-    private static final ModConfigSpec.IntValue MAX_FILE_SIZE = BUILDER
-            .comment("The max file size of upload image (byte).")
-            .translation("cfg.ci.maxsize")
-            .defineInRange("maxsize", 3145728,0,20971520);
-    public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static Boolean remove_all;
     public static Boolean copy_base64;
     public static Integer maxFileSize;
+    public static Integer maxPvWidth;
+    public static Integer maxPvHeight;
+    public static class Common{
+        Common(ModConfigSpec.Builder builder) {
+            MAX_FILE_SIZE = builder
+                    .comment("The max file size of upload image (byte).")
+                    .translation("cfg.ci.maxsize")
+                    .defineInRange("maxsize", 3145728,0,20971520);
+            REMOVE_UPLOADS = builder
+                    .comment("Delete all uploaded image when server restart.")
+                    .translation("cfg.ci.remove_all")
+                    .define("remove_uploads", true);
+        }
+        public final ModConfigSpec.BooleanValue REMOVE_UPLOADS;
+        public final ModConfigSpec.IntValue MAX_FILE_SIZE;
+    }
+    public static final ModConfigSpec commonSpec;
+    public static final Common COMMON;
+    static {
+        final Pair<Common, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Common::new);
+        commonSpec = specPair.getRight();
+        COMMON = specPair.getLeft();
+    }
 
+    public static class Client{
+        Client(ModConfigSpec.Builder builder) {
+
+            COPY_BASE64 = builder
+                    .comment("[CLIENT] Copy base64 data instead of ci code.")
+                    .translation("cfg.ci.copy_base64")
+                    .define("copy_base64", false);
+            MAX_PV_W = builder
+                    .comment("[CLIENT] max preview width, 0 means infinty.")
+                    .translation("cfg.ci.maxpvw")
+                    .defineInRange("max_pv_w", 200,0,1000);
+            MAX_PV_H = builder
+                    .comment("[CLIENT] max preview height, 0 means infinty.")
+                    .translation("cfg.ci.maxpvh")
+                    .defineInRange("max_pv_h", 200,0,1000);
+        }
+        public final ModConfigSpec.BooleanValue COPY_BASE64;
+        public final ModConfigSpec.IntValue MAX_PV_W;
+        public final ModConfigSpec.IntValue MAX_PV_H;
+    }
+    public static final ModConfigSpec clientSpec;
+    public static final Client CLIENT;
+    static {
+        final Pair<Client, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Client::new);
+        clientSpec = specPair.getRight();
+        CLIENT = specPair.getLeft();
+    }
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent event)
     {
-        remove_all=REMOVE_UPLOADS.get();
-        copy_base64=COPY_BASE64.get();
-        maxFileSize=MAX_FILE_SIZE.get();
+        if (event.getConfig().getType()== ModConfig.Type.CLIENT) {
+            copy_base64 = CLIENT.COPY_BASE64.get();
+            maxPvWidth = CLIENT.MAX_PV_W.get();
+            maxPvHeight = CLIENT.MAX_PV_H.get();
+        }
+        if (event.getConfig().getType()== ModConfig.Type.COMMON) {
+            remove_all=COMMON.REMOVE_UPLOADS.get();
+            maxFileSize=COMMON.MAX_FILE_SIZE.get();
+        }
     }
 }

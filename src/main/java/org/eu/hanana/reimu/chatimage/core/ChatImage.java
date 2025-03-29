@@ -42,13 +42,14 @@ public class ChatImage {
     public static final Map<String,ChatImage> BufferedChatImage = new HashMap<>();
     public static final Map<String,ResourceLocation> BufferedTexture = new HashMap<>();
     public URL url;
-    public int w,h;
+    public int w,h,rawW,rawH;
     public String info;
+    public boolean currentRaw;
     public ImageStatus status;
-    private ChatImage(){
+    protected ChatImage(){
         status=ImageStatus.NEW;
     }
-    private ChatImage(String url,int w,int h,String info) throws MalformedURLException {
+    protected ChatImage(String url,int w,int h,String info) throws MalformedURLException {
         this();
         if (!ChatimageMod.GLOBAL_PROTOCOL) {
             if (url.startsWith("ci:")) {
@@ -84,11 +85,39 @@ public class ChatImage {
         BufferedTexture.clear();
         BufferedChatImage.clear();
     }
+    public String getTextureId(){
+        return Integer.toHexString(url.toString().hashCode())+"@"+w+","+h;
+    }
+    @OnlyIn(Dist.CLIENT)
+    public boolean viewRaw(boolean isRaw){
+        if (status!=ImageStatus.OK) return false;
+        if (isRaw==currentRaw){
+            return false;
+        }
+        if (getTexture()!=null){
+            var texId=getTexture();
+            AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(texId);
+            if (texture instanceof DynamicTexture dynamicTexture) dynamicTexture.close();
+            BufferedTexture.remove(getTextureId());
+        }
+        // 交换 w 和 rawW
+        w = w ^ rawW;
+        rawW = w ^ rawW;
+        w = w ^ rawW;
+        // 交换 h 和 rawH
+        h = h ^ rawH;
+        rawH = h ^ rawH;
+        h = h ^ rawH;
+
+        currentRaw=isRaw;
+        this.status=ImageStatus.NEW;
+        return true;
+    }
     @Nullable
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture() {
-        if (status==ImageStatus.OK&&BufferedTexture.containsKey(url.toString())){
-            return BufferedTexture.get(url.toString());
+        if (status==ImageStatus.OK&&BufferedTexture.containsKey(getTextureId())){
+            return BufferedTexture.get(getTextureId());
         }else if (status==ImageStatus.NEW){
             new Thread(this::downloadImg).start();
         }
@@ -112,7 +141,10 @@ public class ChatImage {
 
             byte[] abyte = outputStream.toByteArray();
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(abyte));
-
+            if (!currentRaw) {
+                rawW = image.getWidth();
+                rawH = image.getHeight();
+            }
             // 创建一个新的图片缓冲区，用于存放缩放后的图片
             BufferedImage outputImage = new BufferedImage(w, h, image.getType());
 
@@ -145,7 +177,7 @@ public class ChatImage {
             Minecraft.getInstance().schedule(()->{
                 try {
                     Minecraft.getInstance().getTextureManager().register(resourcelocation, new DynamicTexture(null, read));
-                    BufferedTexture.put(url.toString(), resourcelocation);
+                    BufferedTexture.put(getTextureId(), resourcelocation);
                     status=ImageStatus.OK;
                     finish.set(true);
                 }catch (Throwable throwable){
@@ -223,6 +255,14 @@ public class ChatImage {
         }
         public String toCiCode(){
             return "CI"+gson.toJson(this);
+        }
+
+        public void setImageSizeRaw() throws IOException {
+            try (InputStream inputStream = URI.create(url).toURL().openConnection().getInputStream()) {
+                BufferedImage read = ImageIO.read(inputStream);
+                this.w=read.getWidth();
+                this.h=read.getHeight();
+            }
         }
     }
 }

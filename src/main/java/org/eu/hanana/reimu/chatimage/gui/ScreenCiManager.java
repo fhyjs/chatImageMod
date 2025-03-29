@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,6 +39,9 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
     public Screen oldScreen;
     public Method sendMethod;
     public String oldScreenName;
+    public Checkbox rawBtn;
+    public Button sendBtn;
+
     public ScreenCiManager(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
@@ -51,7 +55,7 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
         addRenderableWidget(Button.builder(Component.literal("X"),(button)->{
             ScreenCiManager.this.onClose();
         }).bounds(getGuiLeft()+getXSize()-30,getGuiTop()+7,15,15).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.ci.send"),(button)->{
+        addRenderableWidget(sendBtn=Button.builder(Component.translatable("gui.ci.send"),(button)->{
             try {
                 sendMethod.invoke(oldScreen,textToSend.getValue());
             } catch (IllegalAccessException | InvocationTargetException | NullPointerException e) {
@@ -99,6 +103,28 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
             try {
                 ChatImage chatImage = ChatImage.getChatImage(new ChatImage.ChatImageData(url.getValue(), Integer.parseInt(w.getValue()), Integer.parseInt(h.getValue()), info.getValue()).toCiCode());
                 ChatImage.ChatImageData chatImageData = new ChatImage.ChatImageData(chatImage);
+                if (rawBtn.selected()) {
+                    button.active=false;
+                    rawBtn.active=false;
+                    getMinecraft().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("PROGRESSING/处理中"),Component.empty()));
+                    new Thread(()->{
+                        try {
+                            chatImageData.setImageSizeRaw();
+                            w.setValue(String.valueOf(chatImageData.w));
+                            h.setValue(String.valueOf(chatImageData.h));
+                            rawBtn.onPress();
+                            getMinecraft().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("SUCCESS/完成"),Component.empty()));
+                            getMinecraft().schedule(()->button.mouseClicked(button.getX(),button.getY(),0));
+                        } catch (IOException e) {
+                            ChatimageMod.logger.warn(e);
+                            getMinecraft().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("ERROR/错误"),Component.literal(e.toString())));
+                        }finally {
+                            button.active=true;
+                            rawBtn.active=true;
+                        }
+                    }).start();
+                    return;
+                }
                 textToSend.setValue(textToSend.getValue()+chatImageData);
 
                 url.setValue("");
@@ -110,6 +136,14 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
                 getMinecraft().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE,Component.literal("ERROR/错误"),Component.literal(e.toString())));
             }
         }).bounds(getGuiLeft()+100,getGuiTop()+112,20,20).build());
+        rawBtn = addRenderableWidget(Checkbox.builder(Component.literal("§2Raw"),font).onValueChange((checkbox, value) -> {
+            this.w.setEditable(!value);
+            this.h.setEditable(!value);
+            if (value) {
+                w.setValue("150");
+                h.setValue("150");
+            }
+        }).pos(getGuiLeft()+50,getGuiTop()+70).build());
         textToSend = addRenderableWidget(new EditBox(this.font,getGuiLeft()+10,getGuiTop()+30,100,20,Component.translatable("gui.ci.gen")));
         url = addRenderableWidget(new EditBox(this.font,getGuiLeft()+10,getGuiTop()+90,100,20,Component.literal("URL")));
         w = addRenderableWidget(new EditBox(this.font,getGuiLeft()+20,getGuiTop()+112,30,20,Component.translatable("gui.ci.width")));
@@ -150,9 +184,6 @@ public class ScreenCiManager extends AbstractContainerScreen<MenuCiManager> impl
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-    }
-    public void setSendMethod(){
-
     }
     @Override
     public void setData(byte[] data) {

@@ -25,5 +25,8 @@
   "cfg.ci.maxsize": "The max file size of upload image (byte).",
   "gui.ci.maxsize": "Max image file size %s.",
   "gui.ci.copycode": "Shift : Copy code.",
+  "cfg.ci.maxpvw": "max preview width, 0 means infinty.",
+  "cfg.ci.maxpvh": "max preview height, 0 means infinty.",
+  "gui.ci.raw": "View raw",
   "gui.ci.parse_helper": "chat image helper"
 }

@@ -26,6 +26,9 @@ public abstract class MixinGuiGraphics {
     public void renderComponentHoverEffect(Font pFont, @Nullable Style pStyle, int pMouseX, int pMouseY, CallbackInfo callbackInfo) {
         if (pStyle!=null&&pStyle.getHoverEvent()!=null){
             HoverEvent hoverEvent = pStyle.getHoverEvent();
+            if (hoverEvent.action()!=Actions.SHOW_IMAGE){
+                return;
+            }
             Component component = ((Actions.ShowImage) hoverEvent).component();
             if (component != null) {
                 RenderCi.render(pFont, component.getString(), ((GuiGraphics)((Object) this)), pMouseX, pMouseY);

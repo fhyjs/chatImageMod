@@ -52,6 +52,7 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
     private float scale;
     private double img_x,img_y;
     private boolean dragging = false;
+    public ImageStatus status;
     public ScreenImageInfo(MenuCiManager pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         imageWidth=256;
@@ -128,7 +129,16 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
                 }
             }
         }).bounds(getGuiLeft()+getXSize()-163,getGuiTop()+23,40,15).build());
-        reset();
+        addRenderableWidget(Button.builder(Component.translatable("gui.ci.raw"),(button)->{
+            image.viewRaw(true);
+            removeWidget(button);
+        }).bounds(getGuiLeft()+12,getYSize()+getGuiTop()-31,30,15).build());
+        //reset();
+    }
+    protected void onStatusChanged(ImageStatus status,ImageStatus old){
+        if (status==ImageStatus.OK){
+            reset();
+        }
     }
     private void reset(){
         scale=0 ;
@@ -168,6 +178,9 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
     @Override
     protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         pGuiGraphics.blit(RenderType::guiTextured,TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight,256, 256);
+        pGuiGraphics.enableScissor(10+getGuiLeft(),50+getGuiTop(), 10+getXSize()-30+getGuiLeft(),50+getYSize()-60+getGuiTop());
+        pGuiGraphics.fill(getGuiLeft(),getGuiTop(), getXSize()+getGuiLeft(),getYSize()+getGuiTop(),0xB4000000);
+        pGuiGraphics.disableScissor();
     }
 
     @Override
@@ -177,7 +190,7 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
             flag=true;
             dragging=true;
         }
-        return flag||super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseX, mouseY, button)||flag;
     }
 
     @Override
@@ -210,7 +223,6 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
         graphics.drawString(this.font, String.format("%s: %s",I18n.get("gui.ci.info"),image.info),7,10,0);
         var texture = image.getTexture();
         graphics.enableScissor(10,50, 10+getXSize()-30,50+getYSize()-60);
-        graphics.fill(0,0, getXSize(),getYSize(),0xB4000000);
         graphics.pose().pushPose();
         graphics.pose().translate(img_x,img_y,0);
         graphics.pose().scale(scale,scale,1);
@@ -235,7 +247,18 @@ public class ScreenImageInfo extends AbstractContainerScreen<MenuCiManager> {
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+        if (status!=image.status){
+            this.onStatusChanged(image.status,status);
+            status=image.status;
+        }
     }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        image.viewRaw(false);
+    }
+
     // 自定义 Transferable 实现
     private static class TransferableImage implements Transferable {
         private final BufferedImage image;

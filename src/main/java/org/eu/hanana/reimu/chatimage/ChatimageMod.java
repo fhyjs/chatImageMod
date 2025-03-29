@@ -69,7 +69,8 @@ public class ChatimageMod {
         MENUS.register(modBus);
         modBus.addListener(this::init);
         container.getEventBus().register(ChatImageConfig.class);
-        container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.SPEC);
+        container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.commonSpec);
+        container.registerConfig(ModConfig.Type.CLIENT, ChatImageConfig.clientSpec);
 
         if (FMLEnvironment.dist.isClient()) {
             clientSideInit(container);
