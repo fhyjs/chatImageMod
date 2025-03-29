@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "org.eu.hanana.reimu.chatimage.mixins",
+  "mixins": [
+    "MixinFriendlyByteBuf",
+    "MixinServerGamePacketListenerImpl",
+    "MixinStringRepresentable"
+  ],
+  "client": [
+    "MixinScreen",
+    "MixinBookEditScreen",
+    "MixinGuiGraphics"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
