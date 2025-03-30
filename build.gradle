@@ -103,9 +103,11 @@ dependencies {
     // And its provides the option to then use net.minecraft as the group, and one of; client, server or joined as the module name, plus the game version as version.
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
     implementation "net.neoforged:neoforge:${neo_version}"
+    implementation "org.eu.hanana.reimu.mc.lcr:neoforge:2.0.0"
     //api "org.eu.hanana.reimu.mc.lcr:neoforge:1.1.0"
     //api "dev.architectury:architectury:15.0.1"
-    //api "dev.architectury:architectury-neoforge:15.0.1"
+    implementation "dev.architectury:architectury-neoforge:16.0.3"
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"

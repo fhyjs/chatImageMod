@@ -28,12 +28,13 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 //import org.eu.hanana.reimu.chatimage.command.ChatImageCommand;
+import org.eu.hanana.reimu.chatimage.command.ChatImageCommand;
 import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatimageURLStreamHandlerFactory;
 import org.eu.hanana.reimu.chatimage.gui.*;
 import org.eu.hanana.reimu.chatimage.networking.*;
-//import org.eu.hanana.reimu.mc.lcr.CommandManager;
-//import org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent;
+import org.eu.hanana.reimu.mc.lcr.CommandManager;
+import org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
 
@@ -46,7 +47,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.eu.hanana.reimu.chatimage.ChatimageMod.MOD_ID;
-//import static org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent.EVENT;
+import static org.eu.hanana.reimu.mc.lcr.events.LegacyCommandRegistrationEvent.EVENT;
 
 @Mod(MOD_ID)
 public class ChatimageMod {
@@ -77,7 +78,7 @@ public class ChatimageMod {
             modBus.addListener(this::registerScreens);
         }
         modBus.addListener(this::registerPayloads);
-        /*
+
         if (ModList.get().isLoaded("legacy_command_registry")){
             EVENT.register(new LegacyCommandRegistrationEvent() {
                 @Override
@@ -86,7 +87,7 @@ public class ChatimageMod {
                 }
             });
         }
-         */
+
     }
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");

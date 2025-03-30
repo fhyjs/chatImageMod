@@ -38,7 +38,7 @@ public class ChatImageCommand extends CommandBase {
                     var i =0;
                     var sb = Component.literal(ChatImage.BufferedChatImage.size()+" item(s) in the server cache.\n");
                     for (String s : ChatImage.BufferedChatImage.keySet()) {
-                        sb.append(String.valueOf(i)).append("• ").append(Component.literal(s).setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,s)).withHoverEvent(new HoverEvent(Actions.getShowImage(),Component.literal(s))))).append("\n");
+                        sb.append(String.valueOf(i)).append("• ").append(Component.literal(s).setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent.SuggestCommand(s)).withHoverEvent(new Actions.ShowImage(Component.literal(s))))).append("\n");
                         i++;
                     }
                     commandSourceStack.sendSuccess(()-> sb,true);
