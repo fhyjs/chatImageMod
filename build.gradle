@@ -165,7 +165,24 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
+tasks.register('signJar', Exec) {
+    dependsOn jar
+    // 签名输出文件名
+    def inputJar = tasks.named('jar').get().archiveFile.get().asFile
+    def signedJar = new File("${buildDir}/libs/${base.archivesName.get()}-${version}-signed.jar")
 
+    commandLine 'jarsigner',
+            '-keystore', 'hanana.jks',
+            '-storepass', '12345678q',  // 也可以通过环境变量注入，避免泄露
+            '-keypass', '12345678q',
+            '-signedjar', signedJar.absolutePath,
+            inputJar.absolutePath,
+            'hananaapps' // alias
+}
+
+tasks.build {
+    dependsOn tasks.signJar
+}
 // Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
