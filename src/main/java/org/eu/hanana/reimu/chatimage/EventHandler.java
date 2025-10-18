@@ -1,0 +1,79 @@
+package org.eu.hanana.reimu.chatimage;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
+import net.neoforged.neoforge.event.ServerChatEvent;
+import org.eu.hanana.reimu.chatimage.core.Actions;
+import org.eu.hanana.reimu.chatimage.core.ChatImage;
+import org.eu.hanana.reimu.chatimage.screen.ChatimageScreen;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.eu.hanana.reimu.chatimage.Util.splitByCiCodes;
+
+public class EventHandler {
+    //@OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public void onScreenInit(ScreenEvent.Init.Post event) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+
+        Screen screen = event.getScreen();
+        if (screen instanceof ChatScreen chatScreen){
+            ExtendedButton addBtn = new ExtendedButton(new Button.Builder(Component.literal("+"), button -> {
+                var cis = new ChatimageScreen();
+                cis.afterInit=()->{
+                  cis.editBoxText.setValue(chatScreen.input.getValue());
+                };
+                screen.getMinecraft().setScreen(cis);
+            }).pos(0,0).size(20,20));
+            screen.addRenderableWidget(addBtn);
+            chatScreen.input.setMaxLength(100000);
+        }
+    }
+    @SubscribeEvent
+    public void onServerChat(ServerChatEvent event){
+        List<Component> flatList = event.getMessage().toFlatList();
+        var result = Component.empty();
+        for (Component component : flatList) {
+            String string = component.getString();
+            List<String> parts = splitByCiCodes(string);
+            for (String part : parts) {
+                if (part.startsWith("CI{")){
+                    try {
+                        ChatImage.getChatImage(part);
+                        if (FMLEnvironment.dist.isDedicatedServer())
+                            ChatImage.clearCache();
+                        result.append(Component.translatable("msg.ci.photo").setStyle(
+                                component.getStyle()
+                                        .withColor(ChatFormatting.GREEN)
+                                        .withHoverEvent(new Actions.ShowImage(Component.literal(part)))
+                                        .withClickEvent(new Actions.ViewImage(part))
+                        ));
+                    } catch (Throwable e) {
+                        result.append(Component.translatable("msg.ci.photo").setStyle(
+                                Style.EMPTY
+                                        .withColor(ChatFormatting.RED)
+                                        .withHoverEvent(new HoverEvent.ShowText(Component.translatable("msg.ci.error_gen").append(Component.literal("\n")).append(Component.literal(e.toString()))))
+                        ));
+                    }
+                }else {
+                    result.append(Component.literal(part).setStyle(component.getStyle()));
+                }
+            }
+        }
+        event.setMessage(result);
+    }
+
+}
