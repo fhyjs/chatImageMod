@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
 
+import java.io.File;
 import java.net.URI;
 
 public class ChatimageScreen extends Screen {
@@ -70,11 +71,19 @@ public class ChatimageScreen extends Screen {
         editBoxDescribe.setMaxLength(1000);
 
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.upload"),button -> {
-            getMinecraft().setScreen(new FileScreen().setParent(this));
+            FileScreen fileScreen = new FileScreen().setParent(this);
+            getMinecraft().setScreen(fileScreen);
+            fileScreen.callback=this::upload;
         }).bounds(x+80,y-60,30,20).build());
 
         afterInit.run();
     }
+
+    private void upload(String path) {
+        var file = new File(path);
+        ChatimageMod.logger.info("selected file '{}'",file.getAbsoluteFile());
+    }
+
     @Override
     public void renderBackground(GuiGraphics p_283391_, int p_295532_, int p_296277_, float p_295918_) {
         super.renderBackground(p_283391_, p_295532_, p_296277_, p_295918_);

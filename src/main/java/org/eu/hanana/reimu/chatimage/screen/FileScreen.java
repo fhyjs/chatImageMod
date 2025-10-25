@@ -103,6 +103,10 @@ public class FileScreen extends Screen {
             refresh();
             getMinecraft().schedule(()->filenameTextField.setValue(""));
         }else {
+            if (!file.exists()){
+                getMinecraft().getToastManager().addToast(new SystemToast(CHATIMAGE_TOAST_ID, Component.translatable("msg.ci.file_not_found"), Component.empty()));
+                return;
+            }
             callback.accept(file.getAbsolutePath());
             onClose();
         }
