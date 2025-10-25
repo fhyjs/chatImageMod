@@ -29,5 +29,10 @@
   "cfg.ci.maxpvw": "max preview width, 0 means infinty.",
   "cfg.ci.maxpvh": "max preview height, 0 means infinty.",
   "gui.ci.raw": "View raw",
-  "gui.ci.parse_helper": "chat image helper"
+  "gui.ci.parse_helper": "chat image helper",
+  "gui.ci.file": "File Chooser",
+  "gui.ci.path": "Path",
+  "msg.ci.file_not_found": "File Not Found",
+  "gui.ci.working": "Working",
+  "gui.ci.drag_tip": "Or drag file here"
 }

@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2ic;
 
 import javax.annotation.Nullable;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatImageToolTipRender {
+    @Deprecated
     public static void renderTooltip(
             GuiGraphics guiGraphics,
             Font font,
@@ -24,18 +26,7 @@ public class ChatImageToolTipRender {
             String ciCode
     ) {
         var positioner = DefaultTooltipPositioner.INSTANCE;
-        List<ClientTooltipComponent> components = new ArrayList<>();
-        ChatImage chatImage=null;
-        try {
-            chatImage = ChatImage.getChatImage(ciCode);
-        } catch (Throwable e) {
-            components.add(ClientTooltipComponent.create(Component.literal(e.toString()).getVisualOrderText()));
-        }
-        if (chatImage!=null){
-            if (chatImage.status!=ImageStatus.OK) components.add(ClientTooltipComponent.create(Component.translatable("msg.ci."+chatImage.status).getVisualOrderText()));
-            components.add(ClientTooltipComponent.create(Component.literal(chatImage.info).getVisualOrderText()));
-            components.add(new ClientChatImageTooltip(chatImage));
-        }
+        List<ClientTooltipComponent> components = getClientTooltipComponents(ciCode);
 
         int i = 0;
         int j = components.size() == 1 ? -2 : 0;
@@ -73,5 +64,21 @@ public class ChatImageToolTipRender {
         }
 
         guiGraphics.pose().popMatrix();
+    }
+
+    public static @NotNull List<ClientTooltipComponent> getClientTooltipComponents(String ciCode) {
+        List<ClientTooltipComponent> components = new ArrayList<>();
+        ChatImage chatImage=null;
+        try {
+            chatImage = ChatImage.getChatImage(ciCode);
+        } catch (Throwable e) {
+            components.add(ClientTooltipComponent.create(Component.literal(e.toString()).getVisualOrderText()));
+        }
+        if (chatImage!=null){
+            if (chatImage.status!=ImageStatus.OK) components.add(ClientTooltipComponent.create(Component.translatable("msg.ci."+chatImage.status).getVisualOrderText()));
+            components.add(ClientTooltipComponent.create(Component.literal(chatImage.info).getVisualOrderText()));
+            components.add(new ClientChatImageTooltip(chatImage));
+        }
+        return components;
     }
 }

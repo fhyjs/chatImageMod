@@ -23,7 +23,7 @@ public class ChatimageScreen extends Screen {
     public EditBox editBoxH;
     public Runnable afterInit= () -> {};
     public ChatimageScreen() {
-        super(Component.translatable("gui.ci.text"));
+        super(Component.translatable("gui.ci.title"));
     }
     @Override
     protected void init() {
@@ -36,7 +36,7 @@ public class ChatimageScreen extends Screen {
         addRenderableWidget(Button.builder(Component.translatable("gui.ci.send"),button -> {
             if (this.minecraft != null && this.minecraft.player != null) {
                 this.minecraft.gui.getChat().addRecentChat(editBoxText.getValue());
-                this.minecraft.player.connection.sendChat(editBoxText.getValue());
+                this.minecraft.player.connection.sendChat(hasShiftDown()?"CI{\"url\":\"ci:cp/assets/chatimage/test_logo.png\",\"w\":111,\"h\":111,\"info\":\"THIS IS A TEST IMAGE.\"}":editBoxText.getValue());
             }
             onClose();
         }).bounds(x+90,y+58,28,20).build());
@@ -64,10 +64,14 @@ public class ChatimageScreen extends Screen {
         addRenderableWidget(editBoxH=new EditBox(font,x-75,y+5,30,20,Component.empty()));
         addRenderableWidget(editBoxDescribe=new EditBox(font,x-116,y+40,100,20,Component.empty()));
         editBoxText.setMaxLength(50000);
-        editBoxUrl.setMaxLength(100);
+        editBoxUrl.setMaxLength(500);
         editBoxW.setMaxLength(1000);
         editBoxH.setMaxLength(1000);
         editBoxDescribe.setMaxLength(1000);
+
+        addRenderableWidget(Button.builder(Component.translatable("gui.ci.upload"),button -> {
+            getMinecraft().setScreen(new FileScreen().setParent(this));
+        }).bounds(x+80,y-60,30,20).build());
 
         afterInit.run();
     }
@@ -88,7 +92,7 @@ public class ChatimageScreen extends Screen {
         var x = this.width / 2;
         var y = this.height / 2;
 
-        p_281247_.drawString(this.font, this.title, i, j, -14737633, false);
+        p_281247_.drawString(this.font, Component.translatable("gui.ci.text"), i, j, -14737633, false);
         p_281247_.drawString(this.font, "URL", x-111, y-28, -14737633, false);
         p_281247_.drawString(this.font, Component.translatable("gui.ci.height"), x-43, y+13, -14737633, false);
         p_281247_.drawString(this.font, Component.translatable("gui.ci.width"), x-85, y+13, -14737633, false);

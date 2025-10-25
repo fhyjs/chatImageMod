@@ -10,6 +10,7 @@
   "cfg.ci.copy_base64": "复制base64而不是ci code",
   "msg.ci.OK": "",
   "msg.ci.ERROR": "§4加载失败",
+  "msg.ci.error_gen": "§4无法生成ci码",
   "msg.ci.WAIT": "§3加载中",
   "gui.ci.add": "添加",
   "gui.ci.clear": "清除缓存",
@@ -29,5 +30,9 @@
   "cfg.ci.maxpvh": "最大预览高度",
   "gui.ci.raw": "查看原图",
   "gui.ci.parse_helper": "图片码助手",
-  "msg.ci.error_gen": "§4无法生成ci码"
+  "gui.ci.file": "选择文件",
+  "gui.ci.path": "路径",
+  "msg.ci.file_not_found": "文件不存在",
+  "gui.ci.working": "正在处理",
+  "gui.ci.drag_tip": "也可以把文件拖进来"
 }

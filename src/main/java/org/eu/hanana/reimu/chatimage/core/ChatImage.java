@@ -81,6 +81,7 @@ public class ChatImage {
         }
         BufferedTexture.clear();
         BufferedChatImage.clear();
+        ChatimageMod.logger.info("cached cleared");
     }
     public String getTextureId(){
         return Integer.toHexString(url.toString().hashCode())+"@"+w+","+h;

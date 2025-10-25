@@ -10,6 +10,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import net.neoforged.neoforge.event.ServerChatEvent;
@@ -25,6 +26,10 @@ import java.util.List;
 import static org.eu.hanana.reimu.chatimage.Util.splitByCiCodes;
 
 public class EventHandler {
+    @SubscribeEvent
+    public void onClientDisconnected(ClientPlayerNetworkEvent.LoggingOut event){
+        ChatImage.clearCache();
+    }
     //@OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onScreenInit(ScreenEvent.Init.Post event) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
