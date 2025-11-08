@@ -39,17 +39,7 @@ jobs:
         run: ./gradlew build
 
       - name: Upload Artifacts
-        shell: bash
-        run: |
-          for jar in build/libs/*.jar; do
-            name=$(basename "$jar")
-            echo "上传单独 JAR: $name"
-            gh api \
-              -H "Authorization: Bearer $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              /repos/${{ github.repository }}/actions/artifacts \
-              -F name="$name" \
-              -F path="$jar"
-          done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-jars
+          path: build/libs/*.jar
