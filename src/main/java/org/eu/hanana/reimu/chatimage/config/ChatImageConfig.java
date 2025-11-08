@@ -13,6 +13,8 @@ public class ChatImageConfig {
     public static Integer maxFileSize;
     public static Integer maxPvWidth;
     public static Integer maxPvHeight;
+    public static Boolean autoViewRaw;
+
     public static class Common{
         Common(ModConfigSpec.Builder builder) {
             MAX_FILE_SIZE = builder
@@ -50,8 +52,13 @@ public class ChatImageConfig {
                     .comment("[CLIENT] max preview height, 0 means infinty.")
                     .translation("cfg.ci.maxpvh")
                     .defineInRange("max_pv_h", 200,0,1000);
+            AUTO_VIEW_RAW = builder
+                    .comment("[CLIENT] max preview height, 0 means infinty.")
+                    .translation("cfg.ci.maxpvh")
+                    .define("auto_view_raw", true);
         }
         public final ModConfigSpec.BooleanValue COPY_BASE64;
+        public final ModConfigSpec.BooleanValue AUTO_VIEW_RAW;
         public final ModConfigSpec.IntValue MAX_PV_W;
         public final ModConfigSpec.IntValue MAX_PV_H;
     }
@@ -69,6 +76,7 @@ public class ChatImageConfig {
             copy_base64 = CLIENT.COPY_BASE64.get();
             maxPvWidth = CLIENT.MAX_PV_W.get();
             maxPvHeight = CLIENT.MAX_PV_H.get();
+            autoViewRaw = CLIENT.AUTO_VIEW_RAW.get();
         }
         if (event.getConfig().getType()== ModConfig.Type.COMMON) {
             remove_all=COMMON.REMOVE_UPLOADS.get();

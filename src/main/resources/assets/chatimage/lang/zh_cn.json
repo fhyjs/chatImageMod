@@ -34,5 +34,6 @@
   "gui.ci.path": "路径",
   "msg.ci.file_not_found": "文件不存在",
   "gui.ci.working": "正在处理",
-  "gui.ci.drag_tip": "也可以把文件拖进来"
+  "gui.ci.drag_tip": "也可以把文件拖进来",
+  "msg.ci.NEW": "§2待处理"
 }

@@ -25,6 +25,7 @@ public class ViewImageScreen extends Screen {
     private ChatImage image;
     protected float img_x,img_y,scale=1;
     private boolean dragging;
+    private Button btnRaw;
 
     public ViewImageScreen(String value) {
         super(Component.translatable("gui.ci.info"));
@@ -52,10 +53,8 @@ public class ViewImageScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("-"),(button)->{
             scale-=0.25f*111*111/image.w/image.h;
         }).bounds(x-40,y-66,15,15).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.ci.raw"),(button)->{
-            image.viewRaw(true);
-            removeWidget(button);
-            reset();
+        addRenderableWidget(btnRaw=Button.builder(Component.translatable("gui.ci.raw"),(button)->{
+            viewRaw();
         }).bounds(x-20,y-66,45,15).build());
         addRenderableWidget(Button.builder(Component.translatable("chat.copy"), new Button.OnPress() {
             @Override
@@ -86,8 +85,15 @@ public class ViewImageScreen extends Screen {
         }).bounds(x+30,y-66,40,15).build());
 
         reset();
+        if (ChatImageConfig.autoViewRaw){
+            viewRaw();
+        }
     }
-
+    private void viewRaw(){
+        image.viewRaw(true);
+        removeWidget(btnRaw);
+        reset();
+    }
     @Override
     public void onClose() {
         super.onClose();
@@ -170,7 +176,7 @@ public class ViewImageScreen extends Screen {
         var x = this.width / 2;
         var y = this.height / 2;
 
-        p_281247_.drawString(this.font, title, i, j, -14737633, false);
+        p_281247_.drawString(this.font, title.copy().append(Component.translatable("msg.ci."+image.status)), i, j, -14737633, false);
         p_281247_.drawString(this.font, String.format("x%.2f",scale), x+80, y-60, -14737633, false);
     }
 }
