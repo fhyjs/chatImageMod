@@ -7,8 +7,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositione
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.units.qual.A;
 import org.eu.hanana.reimu.chatimage.core.Actions;
 import org.eu.hanana.reimu.chatimage.core.ChatImageToolTipRender;
 import org.spongepowered.asm.mixin.Mixin;

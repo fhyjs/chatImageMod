@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +25,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class Util {
+    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    public static String randomString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(CHARS.charAt(SECURE_RANDOM.nextInt(CHARS.length())));
+        }
+        return sb.toString();
+    }
     public static String getFileExtension(File file) {
         if (file == null || file.isDirectory()) {
             return "/"; // 目录返回空字符串
@@ -35,58 +46,7 @@ public class Util {
         }
         return ""; // 无扩展名
     }
-    public static ResourceLocation uploadBufferedImage(BufferedImage image, String id) throws IOException {
-        // 1. 将 BufferedImage 写入字节流
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos);
-        byte[] bytes = baos.toByteArray();
 
-        // 2. 分配堆外内存
-        ByteBuffer buffer = MemoryUtil.memAlloc(bytes.length);
-        buffer.put(bytes);
-        buffer.flip(); // 准备读取
-
-        NativeImage nativeImage;
-        try {
-            // 3. 从内存中读取 PNG → NativeImage
-            nativeImage = NativeImage.read(buffer);
-        } catch (IOException e) {
-            throw new IOException("无法读取NativeImage", e);
-        } finally {
-            MemoryUtil.memFree(buffer);
-        }
-
-        // 4. 创建资源位置
-        ResourceLocation location = ResourceLocation.fromNamespaceAndPath("chatimagemod", "dynamic/icon/" + id);
-
-        // 5. 必须在主线程执行注册
-        AtomicBoolean done = new AtomicBoolean(false);
-        AtomicReference<Throwable> error = new AtomicReference<>(null);
-
-        Minecraft.getInstance().schedule(() -> {
-            try {
-                DynamicTexture texture = new DynamicTexture(null,nativeImage);
-                Minecraft.getInstance().getTextureManager().register(location, texture);
-            } catch (Throwable t) {
-                error.set(t);
-            } finally {
-                done.set(true);
-            }
-        });
-
-        // （可选）等待完成
-        while (!done.get()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignored) {}
-        }
-
-        if (error.get() != null) {
-            throw new IOException("注册动态纹理失败", error.get());
-        }
-
-        return location;
-    }
     public static BufferedImage iconToImage(Icon icon) {
         if (icon == null) return null;
 

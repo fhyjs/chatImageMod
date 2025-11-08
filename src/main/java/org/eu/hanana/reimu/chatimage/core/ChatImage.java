@@ -4,12 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.thread.BlockableEventLoop;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +18,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -31,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ChatImage {
     public static final Map<String,ChatImage> BufferedChatImage = new HashMap<>();
@@ -43,6 +39,17 @@ public class ChatImage {
     public String info;
     public boolean currentRaw;
     public ImageStatus status;
+    private static Class<ClientReflect> clientRClass;
+    static {
+        if(FMLEnvironment.dist.isClient()) {
+            try {
+                //noinspection unchecked
+                clientRClass = (Class<ClientReflect>) Class.forName("org.eu.hanana.reimu.chatimage.core.ClientReflect");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
     protected ChatImage(){
         status=ImageStatus.NEW;
     }
@@ -71,14 +78,14 @@ public class ChatImage {
     }
 
     public static void clearCache() {
-        for (ResourceLocation value : BufferedTexture.values()) {
-            if (FMLEnvironment.dist.isClient()){
-                AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(value);
-                if (texture instanceof DynamicTexture dynamicTexture){
-                    dynamicTexture.close();
-                }
+        if(FMLEnvironment.dist.isClient()) {
+            try {
+                clientRClass.getMethod("clearCache").invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
+
         BufferedTexture.clear();
         BufferedChatImage.clear();
         ChatimageMod.logger.info("cached cleared");
@@ -94,9 +101,11 @@ public class ChatImage {
         }
         if (getTexture()!=null){
             var texId=getTexture();
-            AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(texId);
-            if (texture instanceof DynamicTexture dynamicTexture) dynamicTexture.close();
-            BufferedTexture.remove(getTextureId());
+            try {
+                clientRClass.getMethod("closeTexture", ResourceLocation.class,String.class).invoke(null,texId,getTextureId());
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
         // 交换 w 和 rawW
         w = w ^ rawW;
@@ -172,9 +181,11 @@ public class ChatImage {
             ResourceLocation resourcelocation = ResourceLocation.fromNamespaceAndPath(ChatimageMod.MOD_ID, "dynamic/ci/" + BufferedTexture.size());
             AtomicBoolean finish = new AtomicBoolean(false);
             AtomicReference<Throwable> error = new AtomicReference<>(null);
-            Minecraft.getInstance().schedule(()->{
+            //noinspection unchecked
+            ((BlockableEventLoop<Runnable>) clientRClass.getMethod("getClientBlockableEventLoop").invoke(null)).schedule(()->{
                 try {
-                    Minecraft.getInstance().getTextureManager().register(resourcelocation, new DynamicTexture(null, read));
+                    clientRClass.getMethod("registerDynamicTexture", ResourceLocation.class, NativeImage.class).invoke(null,resourcelocation,read);
+                    //Minecraft.getInstance().getTextureManager().register(resourcelocation, new DynamicTexture(null, read));
                     BufferedTexture.put(getTextureId(), resourcelocation);
                     status=ImageStatus.OK;
                     finish.set(true);
@@ -195,7 +206,11 @@ public class ChatImage {
             ChatimageMod.logger.error(e);
             status=ImageStatus.ERROR;
             if (FMLEnvironment.dist.isClient()){
-                Minecraft.getInstance().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.literal("ERROR/错误"),Component.literal(e.toString())));
+                try {
+                    clientRClass.getMethod("sendToast", Component.class, Component.class).invoke(null,Component.literal("ERROR/错误"),Component.literal(e.toString()));
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
     }

@@ -58,7 +58,7 @@ neoForge {
             server()
             jvmArgument("-Dterminal.jline=true\n" +
                     "-Dterminal.ansi=true")
-            programArgument '--nogui\n'
+            programArgument ''
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

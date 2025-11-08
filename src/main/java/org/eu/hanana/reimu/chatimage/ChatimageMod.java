@@ -6,10 +6,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.HandlerThread;
@@ -18,10 +14,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eu.hanana.reimu.chatimage.config.ChatImageConfig;
 import org.eu.hanana.reimu.chatimage.core.ChatimageURLStreamHandlerFactory;
+import org.eu.hanana.reimu.chatimage.core.LookupHelper;
+import org.eu.hanana.reimu.chatimage.network.FileRequestHandle;
+import org.eu.hanana.reimu.chatimage.network.FileRequestPayload;
+import org.eu.hanana.reimu.chatimage.network.FileTransportHandle;
+import org.eu.hanana.reimu.chatimage.network.FileTransportPayload;
 import org.eu.hanana.reimu.chatimage.register.MenuRegister;
 import sun.misc.Unsafe;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.HashMap;
@@ -31,8 +34,6 @@ import static org.eu.hanana.reimu.chatimage.ChatimageMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class ChatimageMod {
-
-
     public static final String MOD_ID = "chatimage";
     public static final Logger logger = LogManager.getLogger();
     public static boolean GLOBAL_PROTOCOL=true;
@@ -44,10 +45,6 @@ public class ChatimageMod {
         container.registerConfig(ModConfig.Type.COMMON, ChatImageConfig.commonSpec);
         container.registerConfig(ModConfig.Type.CLIENT, ChatImageConfig.clientSpec);
 
-        if (FMLEnvironment.dist.isClient()) {
-            clientSideInit(container);
-            modBus.addListener(this::registerScreens);
-        }
         modBus.addListener(this::registerPayloads);
 
 //        if (ModList.get().isLoaded("legacy_command_registry")){
@@ -62,12 +59,12 @@ public class ChatimageMod {
     }
     private void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1").executesOn(HandlerThread.NETWORK);
+        var fth = new FileTransportHandle();
+        registrar.playBidirectional(FileTransportPayload.TYPE,FileTransportPayload.STREAM_CODEC,fth,fth);
+        registrar.playToServer(FileRequestPayload.TYPE,FileRequestPayload.STREAM_CODEC,new FileRequestHandle());
 
     }
-    //@Dist(Dist.CLIENT)
-    private void clientSideInit(ModContainer container){
-        container.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(container, parent));
-    }
+
     private void init(FMLCommonSetupEvent event){
         if (ChatImageConfig.remove_all) {
             try {
@@ -81,6 +78,30 @@ public class ChatimageMod {
             // 注册自定义的URL流处理器工厂
             URL.setURLStreamHandlerFactory(new ChatimageURLStreamHandlerFactory());
         }catch (Throwable e){
+            try {
+                // 创建高权限 lookup
+                MethodHandles.Lookup lookup = LookupHelper.trustedLookup(ModularURLHandler.class);
+
+                // 获取 VarHandle
+                VarHandle vh = lookup.findVarHandle(ModularURLHandler.class, "handlers", Map.class);
+
+                // 读取当前 Map
+                Map<String, ModularURLHandler.IURLProvider> handlers =
+                        (Map<String, ModularURLHandler.IURLProvider>) vh.get(ModularURLHandler.INSTANCE);
+
+                // 创建新的副本并插入协议
+                Map<String, ModularURLHandler.IURLProvider> eMap = new HashMap<>(handlers);
+                eMap.put("ci", new ChatimageURLStreamHandlerFactory.ChatimageURLStreamHandler());
+
+                // 设置回去
+                vh.set(ModularURLHandler.INSTANCE, eMap);
+
+                ChatimageMod.logger.warn("Add protocol with Lookup — safe and module-aware!");
+                return;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                logger.warn("Trying unsafe!");
+            }
             try {
                 Field field = Unsafe.class.getDeclaredField("theUnsafe");
                 field.setAccessible(true);
@@ -97,8 +118,5 @@ public class ChatimageMod {
                 logger.error("Failed to add ci protocol!Using default!");
             }
         }
-    }
-    private void registerScreens(RegisterMenuScreensEvent event) {
-       //event.register(MenuRegister.EMPTY_MENU.get(), ChatimageScreen::new);
     }
 }

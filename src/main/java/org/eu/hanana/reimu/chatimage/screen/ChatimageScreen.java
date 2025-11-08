@@ -10,8 +10,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.eu.hanana.reimu.chatimage.ChatimageMod;
 import org.eu.hanana.reimu.chatimage.core.ChatImage;
+import org.eu.hanana.reimu.chatimage.network.transporter.FtpInputStream;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 
 public class ChatimageScreen extends Screen {
@@ -82,6 +85,15 @@ public class ChatimageScreen extends Screen {
     private void upload(String path) {
         var file = new File(path);
         ChatimageMod.logger.info("selected file '{}'",file.getAbsoluteFile());
+        try {
+            FtpInputStream ftpInputStream = new FtpInputStream(new FileInputStream(file).readAllBytes(), null);
+            ftpInputStream.callbackTransfer = stringFtpInputStreamTuple -> {
+                this.editBoxUrl.setValue("ci:lo/"+stringFtpInputStreamTuple.getA());
+            };
+            new Thread(ftpInputStream).start();
+        } catch (IOException e) {
+            minecraft.getToastManager().addToast(new SystemToast(CHATIMAGE_TOAST_ID, Component.translatable("msg.ci.status.error"), Component.literal(e.toString())));
+        }
     }
 
     @Override

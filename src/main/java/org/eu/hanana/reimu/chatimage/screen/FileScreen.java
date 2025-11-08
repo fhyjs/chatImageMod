@@ -6,13 +6,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
-
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLEnvironment;
+import org.eu.hanana.reimu.chatimage.ClientUtil;
 import org.eu.hanana.reimu.chatimage.Util;
 import org.eu.hanana.reimu.chatimage.screen.widget.TextListWidget;
 
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class FileScreen extends Screen {
     public static final SystemToast.SystemToastId CHATIMAGE_TOAST_ID = new SystemToast.SystemToastId(2000);
@@ -51,6 +50,11 @@ public class FileScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("->"),button -> {
             refresh();
         }).bounds(x+50,y-65,20,20).build());
+        addRenderableWidget(Button.builder(Component.literal("^"),button -> {
+            File file = new File(pathTextField.getValue());
+            pathTextField.setValue(file.getParent());
+            refresh();
+        }).bounds(x+73,y-65,20,20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.ok"),button -> {
             selected();
         }).bounds(x+90,y+58,28,20).build());
@@ -153,7 +157,7 @@ public class FileScreen extends Screen {
                 BufferedImage bufferedImage = Util.iconToImage(FileSystemView.getFileSystemView().getSystemIcon(file1));
                 ResourceLocation resourceLocation = null;
                 try {
-                    resourceLocation = Util.uploadBufferedImage(bufferedImage, ext);
+                    resourceLocation = ClientUtil.uploadBufferedImage(bufferedImage, ext);
                     icons.put(ext,resourceLocation);
                 } catch (IOException ignored) { }
                 for (TextListWidget.TextEntry tl : tls) {

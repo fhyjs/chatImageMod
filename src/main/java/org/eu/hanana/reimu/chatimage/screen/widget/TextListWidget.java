@@ -1,12 +1,10 @@
 package org.eu.hanana.reimu.chatimage.screen.widget;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.gui.ModListScreen;
 import org.jetbrains.annotations.NotNull;
 
 public class TextListWidget extends ObjectSelectionList<TextListWidget.TextEntry> {
