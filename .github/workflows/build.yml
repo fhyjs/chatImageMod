@@ -42,11 +42,14 @@ jobs:
         shell: bash
         run: |
           for jar in build/libs/*.jar; do
-            name=$(basename "$jar" .jar)
-            echo "上传: $name.jar"
-            gh workflow upload-artifact \
-              --name "$name" \
-              --path "$jar"
+            name=$(basename "$jar")
+            echo "上传单独 JAR: $name"
+            gh api \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              /repos/${{ github.repository }}/actions/artifacts \
+              -F name="$name" \
+              -F path="$jar"
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
