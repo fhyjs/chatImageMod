@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "org.eu.hanana.reimu.chatimage.mixins",
+  "mixins": [
+    "MixinServerboundChatPacket",
+    "MixinSignedMessageBodyPacked",
+    "MixinStringUtil"
+  ],
+  "client": [
+    "MixinGuiGraphics",
+    "MixinScreen"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
